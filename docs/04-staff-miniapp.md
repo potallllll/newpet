@@ -1776,7 +1776,7 @@ staff_invite_code.view／copy／share退役保留标识防止复活，不改造�
 > boarding_medication_instructions: human_records_owner_instructions_no_system_or_ai_generation_or_change
 > boarding_special_care_acceptance: explicit_store_decision_no_default_acceptance
 > boarding_special_care_execution: per_pet_actual_content_time_performer_optional_photos
-> boarding_daily_care_actions: unchanged_feeding_walking_cleaning
+> boarding_daily_care_actions: [feeding, walking, cleaning, other]
 > boarding_complex_care_scheduling: excluded
 > boarding_abnormal_record: actual_time_observation_handling_optional_photos_not_diagnosis
 > boarding_abnormal_contact: record_actual_contact_status_result_and_explicit_owner_decision
