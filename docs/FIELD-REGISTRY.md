@@ -404,7 +404,7 @@ F-SITEM-005与F-APPT-007、F-SVC-002及快速开单下拉统一使用wash／groo
 | F-SVC-017 | `pre_service_checked_at` | S | Datetime | 本service_record_id前检查实际完成的服务端记录时间；不通过空勾选或补录时间伪造检查，不与服务实际开始时间混用。 |
 | F-SVC-018 | `pre_service_checked_by_staff_id` | S | ID | 实际检查的本店有效员工；关联稳定staff_id，离职不改历史，照片不强制。 |
 | F-SVC-019 | `service_record_version` | S | Int | 同一宠物服务记录的操作版本，供检查／开始／完成／重新处理／时间更正及04§4.4已完成补图／普通文字更正及§4.5独立护理相同补改等竞态校验；补改沿本版本及F-AUD保留前后内容／人／时间，原因F-AUD-009选填；独立护理真实补改保存的消息按F-AUD原稳定请求／事件及本版本去重，不以F-SVC-023造新完成事件，重试不重复，旧版本不能覆盖新改；不替代订单金额版本或审核row_version，不表示所有待决动作已获批准。 |
-| F-SVC-020 | `pre_service_check_items` | C | Struct[] | 洗美service_record_id的skin／ears／eyes／mouth／nails／coat六项真实结果及必要说明，不默认正常；独立护理不强制此六项数组，改用F-SVC-016整体检查。同宠洗美护理加项仍须原洗美六项，不因加项减免。非中止服务本人可见真实护理注意事项；洗美中止按04§4.4不对顾客返回本次过程，内部已保存检查保留、不能跳过原开始检查。内部备注不混入。 |
+| F-SVC-020 | `pre_service_check_items` | C | Struct[] | 洗美service_record_id的skin／ears／eyes／mouth／nails／coat六项真实结果及必要说明，04§4.4快捷标签通过原项结构记录，标签映射真实三类结果，不默认正常；独立护理不强制此六项数组，改用F-SVC-016整体检查。同宠洗美护理加项仍须原洗美六项，不因加项减免。非中止服务本人可见真实护理注意事项；洗美中止按04§4.4不对顾客返回本次过程，内部已保存检查保留、不能跳过原开始检查。内部备注不混入。 |
 | F-SVC-021 | `pre_service_owner_decision` | C | Enum | 洗美／护理异常或无法检查时宠物主人已明确表达的continue_authorized或discontinue，未记录为空、不默认同意；店员记录告知及真实决定，说明复用F-SVC-008／011，操作时间／人复用F-AUD。不是线上身份验证、医疗同意书或跨店共享授权。 |
 | F-SVC-022 | `post_service_has_new_abnormality` | C | Bool | 洗美及独立护理完成前是否新增异常，未确认为空，须真实确认为false或true；true须F-SVC-011说明，不强制照片或重复整套前检查，不因无照片拒绝完成。 |
 | F-SVC-023 | `service_result_version` | S | Int | 本宠普通结果的真实发布版本；完成发布，未结算重新处理后旧版保留历史、非当前最终，再完成新版本并对应新完成事件。正常已完成后仅补图／改普通文字不构成新的完成发布，不推进本完成轮次或重置查看事实；内容补改版本用F-SVC-019及F-AUD，不冒充顾客看过新增内容。不是AI权益／任务版本，不自动重置资格或启动AI。 |
@@ -442,7 +442,7 @@ F-SVC-005／006允许按04§4.3补录／更正实际时间：原因选填，保�
 | F-BOARD-018 | `feed_timeline_event_id` | D | ID | 2026-11-01退役：取消商品加餐独立投喂执行流程。保留永久注册号／逻辑名供追溯，不创建新字段／API或继续写入；真实照护需要时使用F-BOARD-007～013另记，不以付款推断喂食。 |
 | F-BOARD-019 | `boarding_location_label` | S | Text | 本次寄养位置的选填简单文字，如A01笼位／客厅散养；同店相同位置已有在住宠物只提醒，不代表房型／房价／笼位库存或硬容量。 |
 | F-BOARD-020 | `boarding_profile_snapshot` | S | Struct | 本次寄养资料，按F-PET-018～027等已确认寄养字段带入；临时修改只影响当前寄养，明确同步且有原字段维护权才回写长期档案。不是第二个Pet，不含可由员工代改的当前食品品牌或跨店授权。当前加餐必须读取本次有效资料，不能只读长期档案旧值。 |
-| F-BOARD-021 | `boarding_belongings` | S | Text/Struct | 选填随带物品文字及真实媒体引用；不强制逐件建档，不自动成为销售／库存对象，不因入住就默认向顾客或其他门店公开。 |
+| F-BOARD-021 | `boarding_belongings` | S | Text/Struct | 选填随带物品快捷多选、补充文字及真实媒体引用；不强制逐件建档，不自动成为销售／库存对象，不因入住就默认向顾客或其他门店公开。 |
 | F-BOARD-022 | `boarding_admission_check_status` | S | Enum | not_checked／no_obvious_abnormality／abnormal／unable_to_check，默认未检查；入住前必须真实三选一，异常／无法检查须说明及沟通后接收决定，不强填洗美六项、不表示医学检查。 |
 | F-BOARD-023 | `boarding_admission_notes` | S | Text | 入住异常／无法检查的必要说明，以及与宠物主人沟通后本店接收或不接收决定的说明；04§5.4主人提供的本次健康资料文字／核对备注复用本值，不强制无异常时伪填病情。资料状态031、选填照片032分别记录；不接收不创建有效入住。 |
 | F-BOARD-024 | `boarding_admission_decision` | S | Enum | accepted／declined；本店员工核对后的真实接收／不接收决定，未完成为空，不默认接收。疫苗资料可不上传、缺资料不自动拒绝的人工决定按04§5.4，缺必需检查仍不得入住；不是老板审批或有效入住本身，也不代表医学准入判断。 |
@@ -760,7 +760,7 @@ AI拍照入库五项按03e§15.1.6／04§3.0.19.1：现场拍摄或相册、多�
 | F-MSG-009 | `message_summary` | C | Text | 消息摘要 / 内容。 |
 | F-MSG-010 | `related_business_type` | C | Enum/Text | 关联业务对象类型。 |
 | F-MSG-011 | `related_business_id` | C | ID | 关联真实业务对象。 |
-| F-MSG-012 | `message_priority` | C | Enum | 仅普通通知 / 重要通知，全小程序统一，见03f§10；不与F-MSG-007业务类型、发送渠道或已读／待办状态混用。原较低档映射普通通知，原始审计保留；等级本身不触发短信或食品重新知悉，不另建priority／notification_level同义字段。 |
+| F-MSG-012 | `message_priority` | C | Enum | 仅普通通知 / 重要通知，全小程序统一，见03f§10；不与F-MSG-007业务类型、发送渠道或已读／待办状态混用。洗护／商品单次复购提醒按03f§10.1使用普通通知；原较低档映射普通通知，原始审计保留；等级本身不触发短信或食品重新知悉，不另建priority／notification_level同义字段。 |
 | F-MSG-013 | `read_status` | C | Enum/Bool | 已读状态，由服务端保存。 |
 | F-MSG-014 | `read_at` | C | Datetime | 成功打开消息内容或有权限业务详情后的已读时间。 |
 | F-MSG-015 | `jump_target` | C | Struct/Text | 深链目标；必须由服务端校验业务归属与权限。 |
