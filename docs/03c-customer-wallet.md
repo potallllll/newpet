@@ -1,8 +1,8 @@
 # 03C 客户端「我的钱包」模块
 
 > status: mixed
-> confirmed_scope: wallet_recharge_refund_coupon_checkout_and_invite_code_rules_except_recharge_refund_used_benefit_recovery_formula
-> pending_scope: deferred_complex_benefit_recovery_activity_mapping_and_platform_recovery_first_batch_checkout_contract_in_08_09_11
+> confirmed_scope: wallet_recharge_refund_including_owner_manual_principal_refund_coupon_checkout_and_invite_code_rules
+> pending_scope: deferred_activity_mapping_and_platform_recovery_first_batch_checkout_contract_in_08_09_11
 > status_scope: full_document
 > change_policy: record_required
 > development_readiness: partial
@@ -34,7 +34,7 @@
 > coupon_template_disabled_existing_instances: original_instance_rules_remain_effective
 
 
-**首批边界**：正常充值、按原充值退款及结算选券的已确认流程保留。已用赠送权益或复杂部分回收遇到规则未定义时，转现有客服／平台人工处理，保留原账和证据，不自动扣回或写负余额。活动记录的结算和消费历史按§9.3.3；平台异常恢复延后。§10 的选券校验、锁定和成功后核销是首批业务规格，接口及事务契约在08／09／11收口。
+**首批边界**：正常充值、按原充值退款及结算选券的已确认流程保留。原充值的赠送金或赠券任一已使用即停用自动计算，由本店老板与顾客协商后从原充值单手动登记实际退还本金，见§4.3。活动记录的结算和消费历史按§9.3.3；平台异常恢复延后。§10 的选券校验、锁定和成功后核销是首批业务规格，接口及事务契约在08／09／11收口。
 
 ## 1. 客户端定位
 
@@ -119,20 +119,22 @@ V1.0 不引入复杂营销条件引擎。
 充值成功记账后，原充值实收、赠送金额、赠券、实际发生时间和经办人锁定，不再提供“充值更正／撤销”或直接覆盖原值。录错且确实需要退回资金时，统一走§4.3充值退款；不以改余额、删流水或超管直接覆盖代替退款。系统保留原充值和后续退款的完整关联与自动审计。
 ### 4.3 充值退款
 
-> status: mixed
-> status_scope: recharge_refund
-> confirmed_scope: original_recharge_entry_owner_staff_no_approval_required_reason_and_automatic_audit
-> pending_scope: deferred_bonus_and_coupon_recovery_formula_for_used_benefits
+> status: confirmed
+> status_scope: recharge_refund_business_rules
+> used_recharge_benefit_refund_mode: owner_manual_principal_only
+> used_recharge_benefit_refund_auto_amount: false
+> refund_reason_required: true
+> automatic_audit_log: true
 > development_readiness: partial
 > blocked_by: []
 
 1. 取消“修改余额”入口。任何人不得直接输入目标本金／赠送余额覆盖当前钱包，也不得借充值退款无关联地增加或扣减余额。
-2. 本店老板或有效员工从一笔已成功充值记录发起全额或部分充值退款，无需审批；必须填写退款原因，并记录实际退款金额、方式和真实发生时间。
+2. 普通充值退款由本店老板或有效员工从一笔已成功充值记录发起全额或部分充值退款，无需审批。必填退款原因，保存实际退款金额、方式和真实发生时间。已使用赠送权益的场景按第6项由老板办理。
 3. 退款本金不得超过该原充值尚未退款的实收，也不得超过该顾客当前可扣回的本金余额；确认后扣减对应本金、写入独立退款记录和钱包流水，不改写原充值。
 4. 充值退款只处理与该原充值关联且可合法回收的资产，不允许跨充值、跨顾客或跨门店扣减，也不允许产生负余额。
-4. 退款在线下实际完成后再记账；系统不接外部支付通道。失败、余额不足、重复提交或并发超额均不得形成半笔退款或负余额。
-5. 原充值关联赠送余额／赠券仍未使用时，完整充值退款应一并收回；已经消费、转为其他权益或已核销时，不得强扣为负数。已消费赠送金和已核销赠券的回收方向是从同笔充值的可退本金中扣回。优先全额抵扣还是按比例折算、已用券计价基准及部分退款的计算公式均待确认。该类场景继续由客服／平台人工处理，保留原账及证据，系统不自动计算或扣回，也不生成负余额。
-6. 系统自动记录原充值、退款、操作人、服务端时间及改前改后资产；顾客可见真实余额和退款结果，不读取内部审计。
+5. 退款在线下实际完成后再记账；系统不接外部支付通道。失败、余额不足、重复提交或并发超额均不得形成半笔退款或负余额。
+6. 原充值没有已使用赠送权益时，完整退款按原规则一并收回关联的未使用赠送余额和赠券。只要动用过该笔充值的任一赠送金或赠券，即阻断自动计算、自动折算和自动扣回赠送权益。由本店老板与顾客线下协商，允许抹零或少扣；老板在原充值退款页手动输入实际退还的本金金额和原因，普通员工不能提交这一分支。输入的是本次实际退款本金，仍须校验第3～5项的本金上限、真实退款和并发条件。原赠送金消费和券核销记录保留。
+7. 系统自动记录原充值、退款金额和原因、操作人、服务端时间及改前改后资产；顾客可见真实余额和退款结果，不读取内部审计。
 ## 5. 本金与赠送余额
 
 后台必须区分：

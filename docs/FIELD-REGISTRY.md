@@ -396,10 +396,10 @@ F-SITEM-005与F-APPT-007、F-SVC-002及快速开单下拉统一使用wash／groo
 | F-SVC-009 | `service_staff_ids` | S | Ref[] | 实际服务员工稳定引用；员工离职不改写历史。 |
 | F-SVC-010 | `service_duration` | C | Number | 实际服务时长记录语义，计算口径后续架构可细化；04§3.0.8排除员工工时核算不删除本字段，也不得据此新增员工工时、工资或提成算法。 |
 | F-SVC-011 | `service_abnormal_notes` | C | Text | 服务中异常情况。 |
-| F-SVC-012 | `ai_report_task_id` | S | ID | AI 洗护报告任务标识；须顾客主动选择并满足原授权／有效资格才创建，不因服务完成、补图／普通文字更正或页面打开自动创建／重生成，不授予店员代为触发。 |
+| F-SVC-012 | `ai_report_task_id` | S | ID | AI 洗护报告任务标识；顾客主动选择且通过原授权／资格校验后才启动首次生成；按原订单限制最多一份成功报告，生成中复用原任务，失败沿原资格重试。 |
 | F-SVC-013 | `ai_report_status` | S | Enum | 未创建 / 生成中 / 已完成 / 失败等真实任务状态。 |
 | F-SVC-014 | `ai_report_entitlement_id` | S | ID | 对应 `ai_report` 激励广告获得的报告资格。 |
-| F-SVC-015 | `ai_report_content` | S | Struct/Text | 已生成的洗美护理／外观观察报告，不作为医疗诊断；门店补图／普通文字更正不自动覆写或重生成原报告，原真实任务／报告保留，不冒充已分析新素材；AI仍由顾客选择、沿原资格，新素材再分析版本／复用契约待后续。文中的护理观察不等于独立care业务可生成AI报告，care无此新增能力。 |
+| F-SVC-015 | `ai_report_content` | S | Struct/Text | 已生成的洗美护理／外观观察报告，不作为医疗诊断；同一订单仅成功生成一次，报告内容原样保留。补图只更新展示对比图，不重跑、覆盖原报告或再次消耗广告资格。文中的护理观察不等于独立care业务可生成AI报告，care无此新增能力。 |
 | F-SVC-016 | `pre_service_check_status` | C | Enum | 共用not_checked／no_obvious_abnormality／abnormal／unable_to_check，默认未检查。洗美按六项F-SVC-020；独立护理按04§4.5只做一次真实整体三选一，不强填六项。未检查不得开始，异常／无法检查须F-SVC-021主人决定及说明，不伪记正常或输出医疗诊断。 |
 | F-SVC-017 | `pre_service_checked_at` | S | Datetime | 本service_record_id前检查实际完成的服务端记录时间；不通过空勾选或补录时间伪造检查，不与服务实际开始时间混用。 |
 | F-SVC-018 | `pre_service_checked_by_staff_id` | S | ID | 实际检查的本店有效员工；关联稳定staff_id，离职不改历史，照片不强制。 |
@@ -505,7 +505,7 @@ F-SVC-005／006允许按04§4.3补录／更正实际时间：原因选填，保�
 
 充值成功后锁定（03c§4.2／04§3.0.13）：原020～023、原充值created_at、原经办和已生成流水均不得直接更正、撤销或覆盖；V1不提供充值更正入口。错误退还统一走下一段充值退款，不能借退款改写原充值事实。
 
-充值退款（03c§4.3／04§3.0.14）：本店老板／有效员工从原充值记录发起，可部分或全额退款，F-WAL-016原因必填，无审批。复用F-WAL-006生成不可删除的退款余额流水，F-WAL-007=`recharge_refund`，F-WAL-013／014关联原充值，F-WAL-011／012记录本金和赠送余额的实际扣回，F-WAL-008～010记录前后总余额，F-WAL-015及F-AUD记录实际操作人、服务端时间、改前改后；F-CORE-010保证重试不重复。任何分项不得为负，失败不得部分更新。关联赠送余额或赠券已经使用时的精确回收公式尚未确认，相关场景保持阻塞，不得由前端自动猜测、删除已用券或改成普通消费退款。V1不提供任意修改余额或目标余额输入。
+充值退款（03c§4.3／04§3.0.14）：本店老板／有效员工从原充值记录发起，可部分或全额退款，F-WAL-016原因必填，无审批。复用F-WAL-006生成不可删除的退款余额流水，F-WAL-007=`recharge_refund`，F-WAL-013／014关联原充值，F-WAL-011／012记录本金和赠送余额的实际扣回，F-WAL-008～010记录前后总余额，F-WAL-015及F-AUD记录实际操作人、服务端时间、改前改后；F-CORE-010保证重试不重复。任何分项不得为负，失败不得部分更新。关联赠送金或赠券任一已使用时，关闭自动金额计算，仅本店老板可从原充值单手动登记协商后的实际退款本金，复用F-WAL-011扣本金、F-WAL-016保存必填原因并自动审计；不自动扣赠送金或删除已用券。退款上限按03c§4.3校验。V1不提供任意修改余额或目标余额输入。
 
 
 
@@ -1142,11 +1142,11 @@ F-SOC-001 ～ F-SOC-020 的永久注册号继续保留用于历史迁移，但�
 | F-AD-001 | `reward_entitlement_id` | S | ID | 一次可信广告完成后授予的业务权益记录。 |
 | F-AD-002 | `platform_user_id` | S | ID | 权益对应 Platform User；替代 03m 中模糊 `user_id`。 |
 | F-AD-003 | `placement` | C | Enum | 当前固定至少 `ai_report / daily_checkin / pet_advisor`。不得与曝光广告 placement 混用权益逻辑。 |
-| F-AD-004 | `business_key` | C | Text | 权益对应的业务键，例如指定服务报告、自然日签到等。 |
+| F-AD-004 | `business_key` | C | Text | 权益对应的业务键，例如原洗美订单的唯一报告、自然日签到等。 |
 | F-AD-005 | `ad_session_id` | C | Text/ID | 广告 SDK / 服务端验证会话。重复回调只能发一次权益。 |
 | F-AD-006 | `reward_type` | C | Enum/Text | 权益类型。 |
 | F-AD-007 | `reward_amount` | C | Number | 数量型奖励，如顾问 +3 次；不适用时可空。 |
-| F-AD-008 | `entitlement_value` | S | Struct/Text | 非纯数值权益内容，如某服务 AI 报告资格。 |
+| F-AD-008 | `entitlement_value` | S | Struct/Text | 非纯数值权益内容，如某洗美订单 AI 报告资格。 |
 | F-AD-009 | `reward_status` | C | Enum | 验证中 / 已授予 / 未授予等广告权益状态。 |
 | F-AD-010 | `verified_at` | C | Datetime | 可信广告完成验证时间。 |
 | F-AD-011 | `granted_at` | C | Datetime | 对应权益实际授予时间。 |

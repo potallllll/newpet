@@ -35,6 +35,7 @@
 - `10a-customer-ui-design-system.md`：客户端通用视觉基线。
 - `10b-customer-homepage-ui-spec.md`：首页 UI 详细规格。
 - `10c-customer-launch-cover-ad-ui-spec.md`：启动封面广告 UI / 调试规格。
+- [店员端页面布局与老板菜单排序锁定清单](10d-staff-layout-and-owner-menu-checklist.md)：店员端布局与菜单顺序的唯一 UI 清单，复用10a通用配色、字体与触控底线，业务规则继续读04及对应子模块。
 - `04-staff-miniapp.md`：店员端正式需求入口。工作台聚焦当天事项，快捷入口承载四个常用动作，洗美列表归“业务 → 洗美”。服务项目管理与两种快速开单共用洗护／美容／其他三类。门店日常经营和老板设置均在小程序内，网页后台只给平台使用；不做门店侧Web经营后台。店员端必须遵守本批无审批、原因范围、自动审计、结算锁定、充值退款、待办归门店和员工完整手机号可见规则。
 - `execution/deepseek-execution-standard.md`：AI执行、分批交付和独立验收约束；不新增业务规则，不替代阶段14最终开发总提示词。
 - `execution/deepseek-start-prompt.md`：上述标准的可复制启动/整改提示词。
@@ -75,6 +76,8 @@
 8. 涉及首页时读取 `10b-customer-homepage-ui-spec.md`
 9. 涉及启动 / 封面广告时读取 `10c-customer-launch-cover-ad-ui-spec.md`
 10. 涉及字段、接口或数据调取时读取 `FIELD-REGISTRY.md`
+
+凡涉及店员端，另读04。涉及店员布局、菜单或操作动线时，同时读取10d及其引用的10a通用视觉章节。
 
 若单页面行为跨越身份、消息、订单、钱包、广告或其他业务域，必须追加读取对应子模块；不得因采用单模块清单而忽略实际依赖。无法判断依赖范围时，使用完整客户端清单。
 
