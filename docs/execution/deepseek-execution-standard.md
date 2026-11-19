@@ -9,6 +9,13 @@
 > version: 1.1
 > business_authority: referenced_documents_only
 > default_execution_mode: preparation_only
+> technology_stack_status: confirmed
+> miniapp_framework: uni-app
+> miniapp_vue_major: 3
+> backend_language: Java
+> backend_framework: Spring Boot
+> database: MySQL 8.0
+> cache: Redis
 
 ## 1. 文件作用与开工边界
 
@@ -19,11 +26,13 @@
 | ID | 状态 | 必须由用户确定的内容 |
 |---|---|---|
 | DEC-EXEC-01 | pending | 双端小程序核心闭环先行、阶段05完整 Web 后台延后已确认。仍待目标代码仓库／分支、批次详细范围和冻结前的开发授权。 |
-| DEC-EXEC-02 | pending | 小程序技术栈、后端／数据库、AppID与环境、接口契约负责人和部署目标 |
+| DEC-EXEC-02 | pending | 技术栈已确认。微信小程序 AppID、环境、接口契约负责人和部署目标仍待确认。 |
+
+**已确认的技术栈**。客户端和店员端微信小程序统一采用 uni-app（Vue 3），后端采用 Java（Spring Boot），数据库采用 MySQL 8.0，缓存采用 Redis。Java、Spring Boot、Redis 和 uni-app 的具体版本在工程配置阶段登记。
 
 在两项未关闭前，默认只做 G0：读取、冲突审计、需求追踪、技术盘点和测试计划；不得假称真实接口、微信能力、支付、权限或部署已完成。
 
-首批以预约、开单、洗美、寄养、结算等高频闭环为先。复杂异常由现有客服／平台人工承接，顾问聊天长期保存和跨设备同步延后。正式开工前须关闭上述两项决策并取得用户明确授权。框架、代码仓库、AppID 和环境均保持待定；平台 Web 延后不影响既定职责。
+首批以预约、开单、洗美、寄养、结算等高频闭环为先。复杂异常由现有客服／平台人工承接，顾问聊天长期保存和跨设备同步延后。正式开工前须关闭上述两项决策并取得用户明确授权。平台 Web 延后，职责按既定规则执行。
 
 ## 2. 强制读取顺序
 
