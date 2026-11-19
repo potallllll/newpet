@@ -16,12 +16,15 @@
    - docs/execution/deepseek-execution-standard.md
    - docs/00-project-workflow.md、01-project-positioning.md、02-roles-and-accounts.md
    - 按 docs/README.md 的矩阵读取本批全部业务文档，店员端布局和菜单同时读取 docs/10d-staff-layout-and-owner-menu-checklist.md
+   - 涉及平台审核、客服或异常处理时读取 docs/05-platform-web-admin.md，按草案状态评审
    - 涉及字段／API／数据库时读取 docs/FIELD-REGISTRY.md
 2. 报告实际读取的完整 Git commit SHA、文件和章节。
 3. 报告源码、接口、环境、AppID、部署和测试是否真实可访问；没有就明确写“未提供”，不能假称已检查。
 4. 先输出需求追踪矩阵、冲突清单、技术缺口和测试计划，在用户正式授权开工并关闭 DEC-EXEC-01／02 后再写正式代码。
 
 二、必须执行的当前规则
+
+对一笔线下付款按各原业务单分摊记账；商品已收款交货但需求超时走03e§13.1关联补记；纯错录走03d§11.3原单平台核实和追加纠错。技术契约登记后实施。
 
 1. 所有门店业务操作都不审批。只有消费退款、充值退款、免单原因必填，其他原因选填。所有成功修改由服务端记录谁、什么时候、改前、改后。
 2. 结算成功后锁定应收、实收、付款拆分和收款时间；少收走原单补收，多收／不应收走退款。禁止“更正收款”和直接改余额。
