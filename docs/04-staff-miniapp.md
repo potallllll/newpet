@@ -415,7 +415,7 @@ F-STAFF-015 staff_display_name仅为当前员工称呼，员工列表／订单�
 
 > status: mixed
 > confirmed_scope: four_profile_fields_review_activation_withdrawal_single_pending_request_wait_upload_rules_and_license_non_public_rule
-> pending_scope: platform_review_page_details
+> pending_scope: platform_review_action_contracts_and_review_processing_sla
 > blocked_by: []
 > confirmed_by: user
 > confirmed_on: 2026-10-22
@@ -480,7 +480,7 @@ F-STAFF-015 staff_display_name仅为当前员工称呼，员工列表／订单�
 - 上传中、失败或校验未通过的新图片不能作为有效提交材料；明确提示原因并允许重试。新图成功上传前不丢弃原资料／有效引用，不能把预览成功当作上传成功或审核通过。任一拟替换图片尚未成功上传并校验时，不提交该份不完整申请；未修改图片沿用原有效引用，不强迫老板每次重传两张。
 - 上传／替换成功仅为编辑材料准备完成，不直接改写当前有效资料或待审快照；仍须按本节提交、撤回、审核和生效规则处理。失败重试不重复创建审核申请，不改变168小时等待期，也不放宽营业执照访问范围。
 
-待确认：阶段05的平台Web具体审核页面。平台处理申请的审核等待时长不设未经确认的默认值，不与上述生效后168小时的再次提交等待期混用。已确认的资料字段、提交、撤回、审核、生效、等待期、上传规则和字段可见范围继续有效。
+平台 Web 审核页面见[05 §4.1](05-platform-web-admin.md#41-门店管理与资料审核)。平台审核动作契约和申请处理时效待设计；168 小时是上次审核通过并生效后的再次提交等待期。
 
 #### 3.0.7 已确认：营业与预约设置仅两项
 

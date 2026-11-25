@@ -40,8 +40,7 @@
 - [05 平台 Web 后台](05-platform-web-admin.md)：平台专用后台及页面规格。§5.2 按门店导出，§6 店员端异常直接修复与受限代办，§7 操作权限。账号生命周期、接口及数据契约按元数据收口。
 - `execution/deepseek-execution-standard.md`：AI执行、分批交付和独立验收约束；不新增业务规则，不替代阶段14最终开发总提示词。
 - `execution/deepseek-start-prompt.md`：上述标准的可复制启动/整改提示词。
-- `standards/PRD-INDEPENDENT-AUDIT-STANDARD-V1.0.md`：PRD 独立审计的范围、维度、问题等级、证据要求和结论标准；不新增业务规则。
-- `standards/PRD-AUDIT-PROMPT-V1.0.md`：供 ChatGPT、Codex 等 AI 执行 PRD 审计的只读提示词；不授权修改仓库。
+- [PRD 独立审计标准](standards/PRD-INDEPENDENT-AUDIT-STANDARD-V1.0.md)：范围、维度、证据、问题等级及结论。第 13 节提供可复制的只读审计模板。
 
 同一业务范围内，详细子模块解释总纲；页面结构以当前 `03i` 为统一收口，新增详细场景按对应子模块和 UI 规格执行。若出现无法同时满足的冲突，必须停止实现并提出冲突。
 
