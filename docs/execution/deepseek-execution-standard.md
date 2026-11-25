@@ -16,6 +16,9 @@
 > backend_framework: Spring Boot
 > database: MySQL 8.0
 > cache: Redis
+> repository_structure: monorepo
+> miniapp_development_appid: test_appid_or_placeholder
+> miniapp_release_appid: official_appid_required
 
 ## 1. 文件作用与开工边界
 
@@ -25,10 +28,14 @@
 
 | ID | 状态 | 必须由用户确定的内容 |
 |---|---|---|
-| DEC-EXEC-01 | pending | 双端小程序核心闭环先行、阶段05完整 Web 后台延后已确认。仍待目标代码仓库／分支、批次详细范围和冻结前的开发授权。 |
-| DEC-EXEC-02 | pending | 技术栈已确认。微信小程序 AppID、环境、接口契约负责人和部署目标仍待确认。 |
+| DEC-EXEC-01 | pending | 单仓、双端小程序核心闭环先行及阶段05完整 Web 后台延后已确认。仍待实际开发仓库与分支、批次详细范围和冻结前的开发授权。 |
+| DEC-EXEC-02 | pending | 技术栈和小程序 AppID 使用规则已确认。实际联调配置、双端正式 AppID 分配、环境、接口契约负责人和部署目标按对应阶段确认。 |
 
 **已确认的技术栈**。客户端和店员端微信小程序统一采用 uni-app（Vue 3），后端采用 Java（Spring Boot），数据库采用 MySQL 8.0，缓存采用 Redis。Java、Spring Boot、Redis 和 uni-app 的具体版本在工程配置阶段登记。
+
+**单仓结构**。后端、客户端小程序、店员端小程序、平台 Web 和项目文档放在同一个 Git 仓库，分别组织在可独立构建或维护的目录。具体目录和构建入口随工程初始化登记。
+
+**AppID 使用规则**。开发配置可先使用占位值 `YOUR_CUSTOMER_APPID`。真机或真实微信能力联调使用有效测试 AppID，并以该测试号实际开放的能力为准。涉及真实微信能力的用例，只有实际联调通过后才记为通过。正式发布前，在各小程序的生产配置中换成对应的正式 AppID，并使用正式配置验证构建和所需微信能力。发布构建须拒绝占位值和测试 AppID。
 
 在两项未关闭前，默认只做 G0：读取、冲突审计、需求追踪、技术盘点和测试计划；不得假称真实接口、微信能力、支付、权限或部署已完成。
 
