@@ -12,6 +12,8 @@
 - DeepSeek执行标准与提示词：[执行标准](docs/execution/deepseek-execution-standard.md) · [可复制提示词](docs/execution/deepseek-start-prompt.md)
 - 店员端：[正式需求及待决边界](docs/04-staff-miniapp.md)
 - 阶段 08 首批契约 · [OpenAPI](contracts/openapi.batch-a.json) · [校验脚本](tests/verify_contract.py) · [实测证据](docs/08-contract-verification.md)
+- 阶段 11 · [技术架构与运行设计](docs/11-technical-architecture-and-runtime.md) · [迁移与验证](docs/11-runtime-verification.md)
+- 阶段 12 · [验收与冻结清单](docs/12-v1-acceptance-and-freeze.md) · [A1_CORE 初始化开工计划](docs/12-a1-core-monorepo-kickoff.md)
 
 具体业务规则只以 `docs/README.md` 指向的正式模块文档为准。本文件不复制当前阶段、业务结论或冲突处理规则，避免入口摘要与正式文档发生漂移。
 

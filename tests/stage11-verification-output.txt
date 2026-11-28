@@ -1,0 +1,171 @@
+R2 CHECK regression reproduced on MySQL 8.0.46
+RuntimeError: ERROR 3819 (HY000) at line 3: Check constraint 'private_media_attachment_chk_1' is violated.
+
+Stage 11 V002 R3 / MySQL 8.0.46
+MySQL 8.0.46
+PASS fresh V001 then V002 installs 63 tables
+PASS V002 incrementally upgrades a populated V001 to 63 tables
+PASS V001 bindings and original invited stores preserved; no AppID or group is inferred
+PASS existing staff and stores get generation one without changed role or status
+PASS two AppID bindings point to the same trusted group
+PASS same issuer and UnionID cannot point to a second User
+PASS one User cannot have two active WeChat groups in the same issuer
+PASS identical OpenID from a different issuer cannot join the group
+PASS a different User cannot attach its V001 binding to the group
+PASS concurrent challenge consumption succeeds once
+PASS rebind cannot link a parent from a different AppID
+PASS one phone challenge cannot produce two rebind challenges
+PASS consumption at exact challenge expiry is invalid
+PASS consumed challenge must remove its sealed context
+PASS wrong AppID and audience cannot be paired
+PASS nullable staff scope cannot omit the generations
+PASS session cannot link another store's staff identity
+PASS both established audiences authenticate against current SQL state
+PASS idle expiry equality rejects both old credentials
+PASS a restored database with a new epoch cannot revive sessions
+PASS staff disable and restore invalidates only old staff credential
+PASS fresh login after staff restore uses the current generation
+PASS stop and restore of a store invalidates the store generation
+PASS fresh login after store restore gets the current store generation
+PASS rebind auth_version invalidates both audiences
+PASS shopfront accepts image/jpeg at 3 MiB
+PASS shopfront accepts image/png at 3 MiB
+PASS shopfront rejects WebP
+PASS shopfront rejects more than 3 MiB
+PASS business license still rejects WebP
+PASS other authorized image purpose still accepts WebP
+PASS a store media intent cannot omit the actor's Store Staff ID
+PASS a private object cannot claim a larger than approved business license
+PASS a verified private object must have an immutable storage version
+PASS foreign store attachment to a valid private object is rejected
+PASS license cannot be attached as a different purpose
+PASS an unchanged occupied attachment slot cannot be replaced concurrently
+PASS replacing the active attachment preserves the original history
+PASS sealed result cannot point to both invite types
+PASS sealed result cannot point to an invite in another Store
+PASS staff invite replay can never extend past the 12 hour window
+PASS generic receipt cannot be deleted before its sealed result expires
+PASS expired seal purge preserves replay receipt and original invitation
+PASS intake health media attaches to its boarding stay without a care event
+PASS ordinary care media cannot attach directly to the boarding stay
+PASS boarding health media cannot use an attachment scope from another store
+PASS health and care media still attach to an existing same-store care event
+PASS two Outbox workers claim the same due event once
+PASS due indexes exist and the first lease was issued
+PASS lease recovers at equality then a new token claims the same event
+PASS stale Outbox acknowledgement cannot overwrite a new lease
+PASS standalone notification projection cannot repeat per event and recipient
+PASS unknown external delivery cannot be represented as a second send intent
+PASS unresolved external attempt is kept as needs_review
+PASS expiry and late settlement compete on the same root at the cutoff
+PASS expiry releases only the matching reservation and keeps physical stock
+PASS completed settlement wins before expiry
+PASS scan after settlement cannot release sold stock
+PASS stores without automatic cancellation keep NULL deadline
+PASS logical backup and restore: dump 0.36s, total 2.69s
+PASS point-in-time replay includes the chosen commit and excludes the later commit (0.17s)
+61 probes passed.
+
+Stage 11 V002 R3 / MySQL 8.4.9
+MySQL 8.4.9
+PASS fresh V001 then V002 installs 63 tables
+PASS V002 incrementally upgrades a populated V001 to 63 tables
+PASS V001 bindings and original invited stores preserved; no AppID or group is inferred
+PASS existing staff and stores get generation one without changed role or status
+PASS two AppID bindings point to the same trusted group
+PASS same issuer and UnionID cannot point to a second User
+PASS one User cannot have two active WeChat groups in the same issuer
+PASS identical OpenID from a different issuer cannot join the group
+PASS a different User cannot attach its V001 binding to the group
+PASS concurrent challenge consumption succeeds once
+PASS rebind cannot link a parent from a different AppID
+PASS one phone challenge cannot produce two rebind challenges
+PASS consumption at exact challenge expiry is invalid
+PASS consumed challenge must remove its sealed context
+PASS wrong AppID and audience cannot be paired
+PASS nullable staff scope cannot omit the generations
+PASS session cannot link another store's staff identity
+PASS both established audiences authenticate against current SQL state
+PASS idle expiry equality rejects both old credentials
+PASS a restored database with a new epoch cannot revive sessions
+PASS staff disable and restore invalidates only old staff credential
+PASS fresh login after staff restore uses the current generation
+PASS stop and restore of a store invalidates the store generation
+PASS fresh login after store restore gets the current store generation
+PASS rebind auth_version invalidates both audiences
+PASS shopfront accepts image/jpeg at 3 MiB
+PASS shopfront accepts image/png at 3 MiB
+PASS shopfront rejects WebP
+PASS shopfront rejects more than 3 MiB
+PASS business license still rejects WebP
+PASS other authorized image purpose still accepts WebP
+PASS a store media intent cannot omit the actor's Store Staff ID
+PASS a private object cannot claim a larger than approved business license
+PASS a verified private object must have an immutable storage version
+PASS foreign store attachment to a valid private object is rejected
+PASS license cannot be attached as a different purpose
+PASS an unchanged occupied attachment slot cannot be replaced concurrently
+PASS replacing the active attachment preserves the original history
+PASS sealed result cannot point to both invite types
+PASS sealed result cannot point to an invite in another Store
+PASS staff invite replay can never extend past the 12 hour window
+PASS generic receipt cannot be deleted before its sealed result expires
+PASS expired seal purge preserves replay receipt and original invitation
+PASS intake health media attaches to its boarding stay without a care event
+PASS ordinary care media cannot attach directly to the boarding stay
+PASS boarding health media cannot use an attachment scope from another store
+PASS health and care media still attach to an existing same-store care event
+PASS two Outbox workers claim the same due event once
+PASS due indexes exist and the first lease was issued
+PASS lease recovers at equality then a new token claims the same event
+PASS stale Outbox acknowledgement cannot overwrite a new lease
+PASS standalone notification projection cannot repeat per event and recipient
+PASS unknown external delivery cannot be represented as a second send intent
+PASS unresolved external attempt is kept as needs_review
+PASS expiry and late settlement compete on the same root at the cutoff
+PASS expiry releases only the matching reservation and keeps physical stock
+PASS completed settlement wins before expiry
+PASS scan after settlement cannot release sold stock
+PASS stores without automatic cancellation keep NULL deadline
+PASS logical backup and restore: dump 0.36s, total 2.53s
+PASS point-in-time replay includes the chosen commit and excludes the later commit (0.18s)
+61 probes passed.
+
+AppID release gate
+PASS protected independent production artifacts
+PASS upload verifies the approved artifact receipt
+PASS upload fails when the build receipt is absent
+PASS development mode cannot upload
+PASS customer placeholder rejected
+PASS staff placeholder rejected
+PASS tourist simulator AppID rejected
+PASS compiled test AppID rejected
+PASS known test AppID rejected even if placed in production allowlist
+PASS same compiled AppID in both artifacts rejected
+PASS swapped customer and staff build outputs rejected
+PASS non-production backend rejected
+PASS backend sender mapping mismatch rejected
+PASS production mock authentication rejected
+PASS same build directory cannot serve both roles
+PASS private project override rejected
+PASS missing compiled app manifest rejected
+PASS same AppID with rebuilt application is accepted for a new digest
+PASS modified code cannot be uploaded using the old receipt
+19 release gate cases passed.
+
+Stage 08 contract 0.3.0 regression against GitHub main
+144 operations, 131 paths, 215 schemas, 314 traced properties, 3674 resolvable references.
+Iteration: {'A1_CORE': 103, 'A2_ENABLER': 32, 'A_DEPENDENT': 9}
+734 registered fields (45 retired), 28 traced header/query names, and recursive request model coverage verified.
+Authorization matrix, route audiences, idempotency, error responses and private cache headers passed.
+15 owner endpoints and 8 conditional owner permissions verified.
+V001 SHA-256, appointment and settlement states, refund modes and tender uniqueness verified.
+OpenAPI 3.1 standard validation passed.
+308 JSON Schema request and response examples passed.
+
+Prior Stage 09 run, unchanged V001 artifact
+Stage 09 V001 regression / MySQL 8.0.46
+67 probes passed. Product, API, Redis and WeChat acceptance are separate.
+
+Stage 09 V001 regression / MySQL 8.4.9
+67 probes passed. Product, API, Redis and WeChat acceptance are separate.

@@ -1,19 +1,22 @@
 # Requirements Status
 
 > version: V1.0
-> current_stage: 04_staff_miniapp
-> stage_status: discussing
+> current_stage: 12_acceptance
+> stage_status: mixed
+> confirmed_scope: stage11_r3_and_stage12_acceptance_and_confirmed_v1_scope
+> pending_scope: stage13_overall_freeze_signoff_development_admission_and_runtime_evidence
 > client_baseline_status: confirmed
 > staff_business_rules_status: confirmed
 > change_policy: record_required
-> development_readiness: documentation_ready_for_next_stage
-> blocked_by: []
+> development_readiness: partial
+> blocked_by: [DEC-EXEC-01, DEC-EXEC-02]
 
 本文件只记录当前阶段、正式基线与仍待后续阶段设计的范围，不保存已经失效的旧规则。
 
 ## 1. 当前结论
 
-- 客户端 V1.0 业务基线已确认；店员端本批业务规则已确认，当前仍可继续讨论后续页面和技术细节。
+- 当前进入阶段 12，锁定验收标准与已确认 V1.0 范围。首条 A1_CORE 链路优先完成预约、确认、到店开工、服务完成、线下收款、顾客回看。整体冻结签收沿项目流程的阶段 13。 [验收与冻结清单](12-v1-acceptance-and-freeze.md) · [开工计划](12-a1-core-monorepo-kickoff.md)
+- 客户端 V1.0 业务基线及店员端本批业务规则已确认，待执行的页面与技术事项依正式模块分批。
 - 所有门店业务操作均不设置老板审批或二次审批。只有消费退款、充值退款和免单的原因必填；其他原因均选填。每次成功修改自动记录操作人、服务端时间、修改前值和修改后值。
 - 消费结算成功后，最终应收、实收、付款拆分和收款时间锁定。少收在原单追加补收，多收或不应收走退款；不提供更正收款或直接覆盖余额。
 - 不提供“修改余额”。已入账充值需要退还时，只能从原充值记录发起充值退款。
@@ -72,11 +75,11 @@
 - ⬜ 06 核心业务规则
 - ⬜ 07 完整业务流程
 - 🟡 08 权限体系（首批双端 API 与鉴权契约已定稿，后续批次、依赖能力和联测继续收口）
-- ⬜ 09 数据库设计
+- 🟡 09 数据库设计（首批 V001 终审 SQL 已定稿，后续批次按依赖完善）
 - 🟡 10 UI / Design System（客户端部分提前并行）
-- ⬜ 11 技术架构
-- ⬜ 12 测试与验收
-- ⬜ 13 V1.0 需求冻结
+- ✅ 11 技术架构（R3 定稿；目标环境按阶段 12 取证）
+- 🟡 12 测试与验收（标准、冻结清单和开工计划已收口，应用联测待执行）
+- ⬜ 13 V1.0 需求冻结（整体范围待最终签收）
 - ⬜ 14 Codex Master Prompt
 - ⬜ 15 Codex 开发
 - ⬜ 16 项目审查
@@ -94,19 +97,21 @@
 | 上门喂养、积分、广告 | 已确认业务规则 | 03j、03k、03o、03p |
 | 店员端 | 本批业务规则已确认 | 04 |
 | 平台 Web 后台 | 账号密码、独立多账号同权限、3 组 9 项页面、单店导出和受限修复已列入正式范围。双端核心验收通过后接入 Web，依赖平台处理的功能随对应动作和回写验收开放。账号管理及技术契约待设计 | [05](05-platform-web-admin.md) |
-| 首批 API 与鉴权 | 双端核心契约 0.2.0 已定稿，平台 API 及 §9 依赖事项按后续阶段收口 | [08](08-api-and-authorization.md) |
+| 首批 API 与鉴权 | 双端核心契约 0.3.0 已定稿，平台 API 及 §9 依赖事项按后续阶段收口 | [08](08-api-and-authorization.md) |
+| 数据库与运行设计 | 首批 V001、V002 R3 和阶段 11 运行设计已定稿，目标环境、真实 AppID 和实测运行证据按阶段 12 验收 | [11](11-technical-architecture-and-runtime.md) · [验证](11-runtime-verification.md) |
+| V1.0 验收／冻结清单 | 已确认业务范围和首条交付顺序已列，真实运行验收与整体冻结签收待执行 | [12](12-v1-acceptance-and-freeze.md) · [开工计划](12-a1-core-monorepo-kickoff.md) |
 | UI | 顾客端精确视觉在阶段10继续收口；店员端页面布局与菜单排序已锁定 | 10a～10c、10d |
 | 字段、API、DTO、事件、数据库命名 | 734 个逻辑字段（C=324／S=365／D=45／P=0）以注册表为唯一依据。退役字段禁新写，物理契约继续另行设计 | FIELD-REGISTRY |
 
 ## 5. 开发批次与后续阶段边界
 
-首批优先打通客户端＋店员端小程序核心闭环，先覆盖预约、开单、洗美、寄养、结算等社区小店高频路径。双端核心验收通过后接入 Web，验证 Web 管理页面不可用时高频路径仍能从双端办理。阶段05完整 Web 平台后台延后，低频异常通过现有客服／平台人工承接。发布顺序见[05 §8](05-platform-web-admin.md)。
+首批优先打通客户端＋店员端小程序核心闭环。先交付 A1_CORE 首条预约 → 确认及到店开工 → 服务完成 → 线下收款 → 顾客回看，随后按正式范围扩展寄养、商品、退款等路径。双端核心验收通过后接入 Web，验证 Web 管理页面不可用时高频路径仍能从双端办理。阶段05完整 Web 平台后台延后，低频异常通过现有客服／平台人工承接。发布顺序见[05 §8](05-platform-web-admin.md)。
 
 **技术栈已确认**。客户端和店员端微信小程序统一采用 uni-app（Vue 3），后端采用 Java（Spring Boot），数据库采用 MySQL 8.0，缓存采用 Redis。
 
 **仓库与 AppID 规则已确认**。后端、客户端小程序、店员端小程序、平台 Web 和文档采用单仓。开发可先用测试号或占位值 `YOUR_CUSTOMER_APPID`；真实微信能力联调用有效测试 AppID，正式上线前替换为对应的正式 AppID 并完成正式配置验收。
 
-正式开发准入仍待关闭 DEC-EXEC-01／02 的其余事项，并须取得开工授权。实际开发仓库与分支、细化批次、实际联调配置、环境和部署目标见[执行标准](execution/deepseek-execution-standard.md)。
+正式开发准入仍待关闭 DEC-EXEC-01／02 的其余事项，并须取得开工授权。仓库及首条批次按本轮计划，实际开发分支、联调负责人、配置、环境和部署目标按[开工计划](12-a1-core-monorepo-kickoff.md)和[执行标准](execution/deepseek-execution-standard.md)登记。
 
 下列内容不是本批未拍板业务规则，而是后续阶段的设计工作：
 

@@ -1,0 +1,3 @@
+# Flyway baselines and recorded checksums use exact bytes on each platform.
+/backend/src/main/resources/db/migration/V001__newpet_batch_a_core.sql -text
+/backend/src/main/resources/db/migration/V002__newpet_batch_a_runtime_foundations.sql -text

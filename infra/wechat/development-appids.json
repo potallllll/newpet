@@ -1,0 +1,12 @@
+{
+  "auth_environment": "local",
+  "real_wechat_enabled": false,
+  "appids": {
+    "customer": "YOUR_CUSTOMER_APPID",
+    "staff": "YOUR_STAFF_APPID"
+  },
+  "integration_appid_env": {
+    "customer": "NEWPET_TEST_CUSTOMER_APPID",
+    "staff": "NEWPET_TEST_STAFF_APPID"
+  }
+}
