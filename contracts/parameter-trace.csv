@@ -1,0 +1,29 @@
+location,parameter,registered_field_ids,operations,note
+header,Idempotency-Key,,acceptStaffInvitation | acknowledgeOwnService | addCareToWash | adjustInventory | adjustSettlementReceivable | cancelCustomerAppointment | cancelService | cancelStaffAppointment | cancelUnsettledProductOrder | changeOrderAttribution | changeOwnDisplayName | closeRefundRequest | completeMediaUpload | completeService | confirmAppointment | confirmBoardingCheckout | confirmConsumptionRefund | confirmProductOrder | confirmWaiver | confirmWeChatRebind | convertAppointment | correctBoardingCheckoutTimes | correctBoardingRate | createAppointment | createBoardingOrder | createCounterProductOrder | createCouponTemplate | createExternalCollectionEvidence | createInviteCode | createLocalCustomer | createLocalPet | createMediaUploadIntent | createOwnedPet | createQuickServiceOrder | createRefundRequest | createServiceItem | createStaffInvitation | createStoreProduct | createStoreProductCategory | decideCustomerReschedule | decideStaffReschedule | deleteUnusedProduct | disableServiceItem | disableStaff | editBoardingCare | editOwnedPet | editRefundRequest | editRequestedProductItems | editServiceResult | editStoreProductCategory | grantCustomerCoupons | holdSettlement | interruptService | lockSettlementCoupon | markAppointmentNoShow | postStockIntake | proposeCustomerReschedule | proposeStaffReschedule | readOwnMessage | recordActualProductReturn | recordBoardingCare | recordHoldContact | recordInitialPayment | recordRecharge | recordRechargeRefund | recordSupplement | recoverExpiredProductSale | redeemInviteCode | registerOwnerStore | rejectAppointment | releaseSettlementCoupon | releaseSettlementHold | removeStaff | removeStoreProductCategory | removeUnusedCoupons | reopenService | replaceBusinessSettings | replaceCart | restoreServiceItem | restoreStaff | startOwnWashAiReport | startService | startStockIntake | submitBoardingSnackRequest | submitProductRequest | updateCouponTemplate | updateServiceItem | updateStoreProduct,HTTP 幂等请求键，作用域及重放以协议约定为准。
+header,If-Match,,deleteUnusedProduct,SKU 删除的当前行版本断言；保持现有线格式。
+header,X-Miniapp-Client,,exchangeWeChat,双端客户端入口，可信应用凭据另行核对。
+query,appointment_type,F-APPT-002,listStaffAppointments,使用对应路由的查询条件及授权范围。
+query,business_date,,listStaffAppointments,使用对应路由的查询条件及授权范围。
+query,business_item_category,F-SITEM-005,listStoreServiceItems,使用对应路由的查询条件及授权范围。
+query,cursor,,listGrantableTemplates | listOwnAppointments | listOwnBoardings | listOwnCoupons | listOwnMessages | listOwnOrders | listOwnPerformanceOrders | listOwnWalletLedger | listOwnedPets | listPublicAppointmentServices | listPublicProducts | listPublicStores | listRecharges | listSettlementCoupons | listStaffAppointments | listStaffBoarding | listStaffCustomerCoupons | listStaffHolds | listStaffOrders | listStaffProducts | listStaffServices | listStockIntakes | listStoreCustomers | listStoreProductCategories | listStoreServiceItems | listStoreStaff,不透明游标绑定身份、筛选、排序和租户；不得改写。
+query,customer_id,F-CORE-004 | F-APPT-004 | F-MSG-005,listOwnPerformanceOrders | listRecharges | listStaffOrders | listStaffServices,使用对应路由的查询条件及授权范围。
+query,customer_mobile,F-CUST-001,listOwnPerformanceOrders | listRecharges,本店手机号筛选，对应注册名 customer_contact_mobile。
+query,date_from,,getOwnPerformance | getStorePerformance | listOwnPerformanceOrders | listRecharges | listStaffOrders | listStaffServices,业务日期起点；以各接口业务时区和日期事实为准。
+query,date_to,,getOwnPerformance | getStorePerformance | listOwnPerformanceOrders | listRecharges | listStaffOrders | listStaffServices,业务日期终点；以各接口业务时区和日期事实为准。
+query,hold_state,,listStaffHolds,挂单/已解除筛选条件，不是新订单持久状态。
+query,limit,,listGrantableTemplates | listOwnAppointments | listOwnBoardings | listOwnCoupons | listOwnMessages | listOwnOrders | listOwnPerformanceOrders | listOwnWalletLedger | listOwnedPets | listPublicAppointmentServices | listPublicProducts | listPublicStores | listRecharges | listSettlementCoupons | listStaffAppointments | listStaffBoarding | listStaffCustomerCoupons | listStaffHolds | listStaffOrders | listStaffProducts | listStaffServices | listStockIntakes | listStoreCustomers | listStoreProductCategories | listStoreServiceItems | listStoreStaff,分页大小上限。
+query,message_priority,F-MSG-012,listOwnMessages,使用对应路由的查询条件及授权范围。
+query,order_performance_staff_id,F-ORD-038,listStaffOrders,使用对应路由的查询条件及授权范围。
+query,order_type,F-ORD-002,listOwnOrders | listOwnPerformanceOrders | listStaffHolds | listStaffOrders,使用对应路由的查询条件及授权范围。
+query,payment_status,F-ORD-017,listStaffOrders | listStaffServices,使用对应路由的查询条件及授权范围。
+query,product_category_id,F-PROD-003,listPublicProducts,使用对应路由的查询条件及授权范围。
+query,product_enabled,F-PROD-020,listStaffProducts,使用对应路由的查询条件及授权范围。
+query,q,,listPublicProducts | listStaffProducts,商品搜索既有关键字参数。
+query,query,,listStoreCustomers,顾客查找既有关键字参数。
+query,recommended,,listPublicProducts,公开商品是否推荐的筛选。
+query,service_internal_status,F-SVC-004,listStaffServices,使用对应路由的查询条件及授权范围。
+query,service_type,F-SVC-002,listStaffServices,使用对应路由的查询条件及授权范围。
+query,staff_id,F-CORE-005,getStorePerformance,使用对应路由的查询条件及授权范围。
+query,template_state,,listGrantableTemplates,模板读视图枚举；disabled/all 仅老板。
+query,unread_only,,listOwnMessages,只显示本人未读消息。
+query,view,,listStaffAppointments | listStaffBoarding | listStaffServices,按当前路由选择办理视图或历史；每种值仍核验业务权限。

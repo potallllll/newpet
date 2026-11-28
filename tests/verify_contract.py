@@ -42,6 +42,7 @@ OWNER_PERMISSIONS = {
     "createInviteCode": "create_invite_code",
 }
 CONDITIONAL_OWNER_PERMISSIONS = {
+    "listStaffOrders": {"order_performance_staff_id_filter": "business_statistics"},
     "updateCouponTemplate": {"template_disable": "disable_coupon_template",
                              "template_restore": "restore_coupon_template"},
     "listGrantableTemplates": {"template_state_is_disabled_or_all": "coupon_management"},
@@ -57,9 +58,7 @@ BUSINESS_ERRORS = (
     ("recordRechargeRefund", 422, "RECHARGE_REFUND_MODE_INELIGIBLE"),
     ("listGrantableTemplates", 403, "ACTION_FORBIDDEN"),
 )
-RETIRED = {"automatic_discount_amount", "coupon_discount_amount", "slot_reservation_status",
-           "payment_correction_id", "refund_owner_approval_status", "points_redemption_id",
-           "recharge_package_note"}
+SCOPED_ALIAS_EXCEPTIONS = {("Problem", "status")}  # RFC problem HTTP status, not a business state.
 EXPECTED = {
     "createAppointment": ("customer", "A1_CORE"), "confirmAppointment": ("staff", "A1_CORE"),
     "convertAppointment": ("staff", "A1_CORE"), "startService": ("staff", "A1_CORE"),
@@ -96,24 +95,87 @@ def csv_rows(name, key):
     return {row[key]: row for row in rows}
 
 
+def read_registry():
+    source = (ROOT / "docs" / "FIELD-REGISTRY.md").read_text(encoding="utf-8")
+    tick = chr(96)
+    row_pattern = (r"^\|\s*(F-[A-Z0-9]+-\d{3})\s*\|\s*" + tick
+                   + r"([a-z0-9_]+)" + tick + r"\s*\|\s*([CSPD])\s*\|")
+    rows = re.findall(row_pattern, source, re.M)
+    assert len(rows) == len({field_id for field_id, _, _ in rows}), "duplicate field registry ID"
+    registry = {field_id: (name, status) for field_id, name, status in rows}
+    expected = int(re.search(r"^> field_count: (\d+)", source, re.M).group(1))
+    assert len(registry) == expected, "field registry count does not match its metadata"
+    retired = {name for name, status in registry.values() if status == "D"}
+    alias_section = source.split("## 23.", 1)[1].split("## 24.", 1)[0]
+    aliases = set()
+    for label in re.findall(r"^\|\s*([^|]+?)\s*\|", alias_section, re.M):
+        if label.startswith((tick, "单一 ")) and "作为渠道" not in label:
+            aliases.update(re.findall(tick + r"([a-z0-9_]+)" + tick, label))
+    return registry, retired, aliases
+
+
+def check_registered_ids(row, registry, label):
+    ids = row["registered_field_ids"].split(" | ") if row["registered_field_ids"] else []
+    for field_id in ids:
+        assert field_id in registry, (label, field_id)
+        assert registry[field_id][1] != "D", (label, "retired ID", field_id)
+    if "status" in row:
+        expected = set(filter(None, row["status"].split(" | ")))
+        assert expected == {registry[field_id][1] for field_id in ids}, (label, "field status mismatch")
+        assert bool(ids) == (row["mapping_class"] == "registry"), (label, "invalid mapping class")
+
+
+def check_request_model(spec, schema, location, visited):
+    """Inspect actual request data definitions, skipping conditional predicates."""
+    if "$ref" in schema:
+        reference = schema["$ref"]
+        if reference not in visited:
+            visited.add(reference)
+            check_request_model(spec, resolve(spec, reference), reference, visited)
+    if schema.get("type") == "object" or {"additionalProperties", "properties"} & schema.keys():
+        assert schema.get("additionalProperties") is False, (location, "request object must be closed")
+    if schema.get("type") == "array" or "items" in schema:
+        limit = schema.get("maxItems")
+        assert isinstance(limit, int) and limit >= schema.get("minItems", 0), (location, "missing array cap")
+        check_request_model(spec, schema["items"], location + "[]", visited)
+    for key, value in schema.get("properties", {}).items():
+        check_request_model(spec, value, f"{location}.{key}", visited)
+    for keyword in ("oneOf", "anyOf", "allOf"):
+        for number, part in enumerate(schema.get(keyword, [])):
+            # A type/properties-free guard or a properties-only allOf narrows an already defined model.
+            if keyword == "allOf" and not ({"$ref", "type", "additionalProperties"} & part.keys()):
+                continue
+            check_request_model(spec, part, f"{location}.{keyword}[{number}]", visited)
+
+
 def check_structure(spec):
     matrix = csv_rows("authorization-matrix.csv", "operation_id")
     fields = csv_rows("field-trace.csv", "api_property")
     assert spec["openapi"] == "3.1.0"
     assert spec["servers"][0]["url"] == "/api/v1"
+    registry, retired, aliases = read_registry()
     ref_count = 0
     for node in walk(spec):
         if "$ref" in node:
             resolve(spec, node["$ref"])
             ref_count += 1
-        for forbidden in RETIRED:
-            assert forbidden not in node.get("properties", {}), forbidden
-    all_properties = {name for schema in spec["components"]["schemas"].values()
-                      for node in walk(schema) for name in node.get("properties", {})}
+    all_properties = set()
+    field_locations = {}
+    for name, schema in spec["components"]["schemas"].items():
+        for node in walk(schema):
+            for field in node.get("properties", {}):
+                assert field not in retired, (name, "retired field", field)
+                assert field not in aliases or (name, field) in SCOPED_ALIAS_EXCEPTIONS, (name, "retired alias", field)
+                all_properties.add(field)
+                field_locations.setdefault(field, set()).add(name)
     assert set(fields) == all_properties
     assert "F-ORD-013" in fields["manual_adjustment_amount"]["registered_field_ids"].split(" | ")
-    assert all(r["status"] != "D" for r in fields.values())
+    for field, row in fields.items():
+        check_registered_ids(row, registry, field)
+        assert set(row["schemas"].split(" | ")) == field_locations[field], (field, "schema trace differs")
     operations = {}
+    traced_parameters = {}
+    visited_request_schemas = set()
     for path, methods in spec["paths"].items():
         for method, op in methods.items():
             name = op["operationId"]
@@ -136,6 +198,19 @@ def check_structure(spec):
             params = [resolve(spec, p["$ref"]) for p in op["parameters"]]
             assert set(re.findall(r"\{(\w+)\}", path)) == {p["name"] for p in params if p["in"] == "path"}
             assert len({(p["in"], p["name"]) for p in params}) == len(params), name
+            for param in params:
+                assert param["name"] not in retired | aliases, (name, "retired parameter", param["name"])
+                if param["in"] in {"header", "query"}:
+                    traced_parameters.setdefault((param["in"], param["name"]), set()).add(name)
+            private = c["policy"] != "public" or name == "exchangeWeChat"
+            assert "500" in op["responses"], name
+            for response in op["responses"].values():
+                resolved = resolve(spec, response["$ref"]) if "$ref" in response else response
+                if private:
+                    cache = resolved["headers"]["Cache-Control"]
+                    assert resolve(spec, cache["$ref"])["schema"]["const"] == "no-store", name
+            error = resolve(spec, op["responses"]["500"]["$ref"])
+            assert error["content"]["application/problem+json"]["schema"]["$ref"].endswith("/Problem"), name
             if name in PUBLIC:
                 assert c["policy"] == "public" and op["security"] == [], name
             elif name in CHALLENGE:
@@ -156,10 +231,15 @@ def check_structure(spec):
                 assert {"400", "409", "422", "503"} <= set(op["responses"]), name
             if "requestBody" in op:
                 schema = op["requestBody"]["content"]["application/json"]["schema"]
-                if "$ref" in schema:
-                    schema = resolve(spec, schema["$ref"])
-                if "properties" in schema:
-                    assert schema["additionalProperties"] is False, name
+                check_request_model(spec, schema, name, visited_request_schemas)
+    with (CONTRACTS / "parameter-trace.csv").open(encoding="utf-8-sig", newline="") as handle:
+        parameter_rows = list(csv.DictReader(handle))
+    tracked = {(row["location"], row["parameter"]): row for row in parameter_rows}
+    assert len(parameter_rows) == len(tracked) and set(tracked) == set(traced_parameters)
+    for key, row in tracked.items():
+        assert set(row["operations"].split(" | ")) == traced_parameters[key], key
+        assert row["note"], key
+        check_registered_ids(row, registry, key)
     assert matrix.keys() == operations.keys()
     assert {name: op["x-access"]["permission_key"] for name, op in operations.items()
             if op["x-access"]["policy"] == "owner"} == {
@@ -173,6 +253,26 @@ def check_structure(spec):
     assert operations["recordRechargeRefund"]["x-access"]["policy"] == "staff"
     assert operations["changeOrderAttribution"]["x-access"]["policy"] == "staff"
     assert operations["registerOwnerStore"]["x-access"]["policy"] == "user"
+    assert not operations["registerOwnerStore"]["x-access"].get("activation_guard")
+    for name in ("createMediaUploadIntent", "completeMediaUpload"):
+        assert operations[name]["x-access"]["activation_guard"] == {
+            "existing_store_sensitive_profile_upload": "deferred_until_stage05_profile_review",
+        }
+        assert "既有门店资料" in matrix[name]["object_scope"]
+    assert any(resolve(spec, p["$ref"])["name"] == "If-Match"
+               and resolve(spec, p["$ref"])["required"]
+               for p in operations["deleteUnusedProduct"]["parameters"])
+    assert operations["removeStoreProductCategory"]["x-concurrency"] == "transactional_category_and_fallback_lock"
+    for name in ("listRecharges", "listOwnPerformanceOrders"):
+        assert name in traced_parameters[("query", "customer_mobile")]
+    assert "本人归属" in operations["listOwnPerformanceOrders"]["x-access"]["scope"]
+
+    for name, expected_schema in {
+        "getOwnAppointment": "CustomerAppointmentDetail", "getStaffAppointment": "StaffAppointmentDetail",
+        "listStaffAppointments": "StaffAppointmentList", "listOwnAppointments": "AppointmentList",
+    }.items():
+        result = operations[name]["responses"]["200"]["content"]["application/json"]["schema"]
+        assert result["properties"]["data"]["$ref"].endswith("/" + expected_schema), name
     assert spec["paths"]["/staff/products/{sku_id}/inventory-adjustments"]["post"]["operationId"] == "adjustInventory"
     assert "/staff/sku/{sku_id}/inventory-adjustments" not in spec["paths"]
     assert "get" not in spec["paths"]["/owner/coupon-templates"]
@@ -207,7 +307,9 @@ def check_structure(spec):
     print(f"{len(operations)} operations, {len(spec['paths'])} paths, {len(response_fields)} schemas, "
           f"{len(fields)} traced properties, {ref_count} resolvable references.")
     print("Iteration:", dict(Counter(op["x-iteration"] for op in operations.values())))
-    print("Authorization matrix, route audiences, idempotency and retired field checks passed.")
+    print(f"{len(registry)} registered fields ({len(retired)} retired), "
+          f"{len(tracked)} traced header/query names, and recursive request model coverage verified.")
+    print("Authorization matrix, route audiences, idempotency, error responses and private cache headers passed.")
     print(f"{len(OWNER_PERMISSIONS)} owner endpoints and "
           f"{sum(map(len, CONDITIONAL_OWNER_PERMISSIONS.values()))} conditional owner permissions verified.")
 
@@ -218,19 +320,35 @@ def check_v001(spec, path):
     ddl = contents.decode("utf-8-sig")
     schemas = spec["components"]["schemas"]
 
+    tables = {
+        match.group("table").lower(): match.group("body")
+        for match in re.finditer(
+            r"^\s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:\`)?(?P<table>\w+)(?:\`)?"
+            r"\s*\((?P<body>.*?)^\)\s*ENGINE\s*=",
+            ddl, re.M | re.S | re.I,
+        )
+    }
+
     def check_enum(table, field):
-        body = ddl.split(f"CREATE TABLE {table} (", 1)[1].split(") ENGINE=", 1)[0]
-        values = re.search(rf"CHECK\s*\(\s*{field}\s+IN\s*\(([^)]+)\)", body).group(1)
-        return set(re.findall(r"'([^']+)'", values))
+        assert table in tables, f"V001 table {table} was not found in {path}"
+        pattern = (r"\bCHECK\s*\(\s*(?:\`)?" + re.escape(field)
+                   + r"(?:\`)?\s+IN\s*\(([^)]+)\)")
+        match = re.search(pattern, tables[table], re.I)
+        assert match, f"V001 CHECK enum {table}.{field} was not found in {path}"
+        return set(re.findall(r"'([^']+)'", match.group(1)))
 
     statuses = set(schemas["AppointmentSummary"]["properties"]["appointment_status"]["enum"])
     database_statuses = check_enum("appointment", "appointment_status")
-    assert statuses == database_statuses | APPOINTMENT_PROJECTIONS
+    assert statuses == database_statuses | APPOINTMENT_PROJECTIONS, (statuses, database_statuses)
     assert APPOINTMENT_PROJECTIONS.isdisjoint(database_statuses)
     refund_modes = check_enum("wallet_recharge_refund", "refund_mode")
     for name in ("RechargeRefund", "RechargeRefundInput"):
-        assert set(schemas[name]["properties"]["refund_mode"]["enum"]) == refund_modes
-    print("V001 SHA-256, appointment status projection and recharge refund modes verified.")
+        assert set(schemas[name]["properties"]["refund_mode"]["enum"]) == refund_modes, (name, refund_modes)
+    settlements = check_enum("order_settlement", "settlement_status")
+    assert set(schemas["Settlement"]["properties"]["settlement_status"]["enum"]) == settlements, settlements
+    assert re.search(r"UNIQUE\s+KEY\s+\w+\s*\(\s*payment_record_id\s*,\s*payment_method\s*\)",
+                     tables["payment_split"], re.I), "V001 payment_split must protect split channel uniqueness"
+    print("V001 SHA-256, appointment and settlement states, refund modes and tender uniqueness verified.")
 
 
 def check_standards(spec):
@@ -368,6 +486,13 @@ def check_standards(spec):
     product_items = [{"order_item_id": "3", "confirmed_quantity": 1}]
     optional_reason_bodies = {
         "MemberChange": {"row_version": "1"},
+        "MemberName": {"row_version": "1", "staff_display_name": "小李"},
+        "ServiceResultEdit": {"service_record_version": "1"},
+        "ServiceCancelInput": {"service_record_version": "1"},
+        "StaffAppointmentCancelInput": {"appointment_version": "1"},
+        "CheckoutTimeCorrection": {"order_amount_version": "1", "items": [
+            {"boarding_id": "1", "row_version": "2", "check_in_at": date, "actual_checkout_at": date}
+        ]},
         "AppointmentVersion": {"appointment_version": "1"},
         "AppointmentReject": {"appointment_version": "1"},
         "AppointmentReschedule": {"appointment_version": "1", "requested_start_at": date},
@@ -375,7 +500,7 @@ def check_standards(spec):
         "BoardingRate": {"row_version": "1", "order_amount_version": "1", "item_original_unit_price": "2.00"},
         "AmountVersion": {"order_amount_version": "1"},
         "AmountEdit": {"order_amount_version": "1", "final_receivable_amount": "3.00"},
-        "Supplement": {"order_amount_version": "1", "verified_fact_ref": "fact-1",
+        "Supplement": {"order_amount_version": "1", "verified_fact_ref": "fact-1", "payment_occurred_at": date,
                        "payment_splits": [{"payment_method": "cash", "payment_amount": "2.00"}]},
         "PerformanceAttribution": {"order_amount_version": "1", "order_performance_staff_id": "2"},
         "CouponGrant": {"items": [{"coupon_template_id": "3", "coupon_grant_quantity": 1}]},
@@ -398,25 +523,206 @@ def check_standards(spec):
             case(f"{name} optional reason {value!r}", name, with_field(body, **{field: value}),
                  not isinstance(value, int))
 
+    customer_detail = with_field(awaiting, special_request="请继续原来的饮食")
+    staff_list_item = with_field(awaiting, customer_name="李女士",
+                                 items=[with_field(booking_items[0], pet_name="豆豆")])
+    staff_detail = with_field(
+        staff_list_item, customer_id="6", customer_contact_mobile="13800000000",
+        customer_contact_wechat=None, special_request="请继续原来的饮食",
+        items=[with_field(staff_list_item["items"][0], pet_type="dog", pet_breed=None)],
+    )
+    for name, body in (("CustomerAppointmentDetail", customer_detail),
+                       ("StaffAppointmentSummary", staff_list_item), ("StaffAppointmentDetail", staff_detail)):
+        case(f"{name} preserves a valid waiting projection", name, body, True)
+        case(f"{name} rejects terminal state with active proposal", name,
+             with_field(body, appointment_status="expired"), False)
+    case("staff appointment pagination uses staff display fields", "StaffAppointmentList",
+         {"items": [staff_list_item], "next_cursor": None}, True)
+    case("staff list does not leak customer contact", "StaffAppointmentSummary",
+         with_field(staff_list_item, customer_contact_mobile="13800000000"), False)
+    case("customer detail does not leak staff-only customer ID", "CustomerAppointmentDetail",
+         with_field(customer_detail, customer_id="6"), False)
+    case("customer detail includes nullable special request", "CustomerAppointmentDetail",
+         with_field(customer_detail, special_request=None), True)
+    case("staff detail includes authorized local contact", "StaffAppointmentDetail",
+         without(staff_detail, "customer_contact_mobile"), False)
+    case("appointment write still rejects profile projection", "AppointmentInput",
+         with_field(appointment, items=[with_field(booking_items[0], pet_name="豆豆")]), False)
+    case("appointment array rejects 21 pets", "AppointmentInput",
+         with_field(appointment, items=[{"pet_id": str(n), "service_item_id": "7"} for n in range(1, 22)]), False)
+    checkout = optional_reason_bodies["CheckoutTimeCorrection"]
+    case("first checkout remains valid without audit reason", "CheckoutBatch", checkout, True)
+    case("first checkout is not a correction request", "CheckoutBatch", with_field(checkout, audit_reason=""), False)
+    case("correction needs per-pet version", "CheckoutTimeCorrection",
+         with_field(checkout, items=[without(checkout["items"][0], "row_version")]), False)
+
+    terms = {"applicable_scope": {"business_types": ["wash"]}, "validity_days": 20}
+    full = with_field(terms, coupon_type="full_reduction", minimum_spend="50.00", discount_amount="5.00")
+    direct = with_field(terms, coupon_type="direct_discount", discount_amount="5.00")
+    percentage = with_field(terms, coupon_type="percentage_discount", discount_rate="0.90")
+    for body in (full, direct, percentage, with_field(percentage, max_discount_amount="10.00")):
+        case(f"valid coupon {body}", "CouponTemplateTerms", body, True)
+    for body in (without(full, "minimum_spend"), with_field(full, minimum_spend="0.00"),
+                 with_field(full, discount_amount="0.00"), without(direct, "discount_amount"),
+                 with_field(direct, max_discount_amount="10.00"), without(percentage, "discount_rate"),
+                 with_field(percentage, discount_rate="0.0000"), with_field(percentage, discount_rate="1.0000"),
+                 with_field(percentage, discount_rate="0.9\n"),
+                 with_field(percentage, discount_amount="5.00")):
+        case(f"invalid coupon {body}", "CouponTemplateTerms", body, False)
+    template = {"coupon_name": "熟客券", "terms": full, "coupon_note": "门店备注"}
+    case("new coupon template accepts an optional note", "CouponTemplateInput", template, True)
+    template_edit = with_field(template, row_version="1", coupon_enabled=True)
+    case("coupon template edit accepts a note", "CouponTemplateEdit", template_edit, True)
+    case("authorized template read includes optional note", "CouponTemplate",
+         with_field(template_edit, coupon_template_id="1"), True)
+    old_coupon = {"coupon_instance_id": "1", "coupon_template_id": "4", "coupon_name": "历史券",
+                  "entitlement_kind": "coupon", "coupon_status": "used", "coupon_source_type": "manual_grant",
+                  "valid_from": date, "valid_until": date, "terms": with_field(percentage, discount_rate="0.0000"),
+                  "invite_code_activity_description": None}
+    case("old authorized coupon snapshot keeps original terms", "Coupon", old_coupon, True)
+    case("customer coupon does not expose template note", "Coupon",
+         with_field(old_coupon, coupon_note="门店备注"), False)
+
+    cash = {"payment_method": "cash", "payment_amount": "2.00"}
+    supplement = optional_reason_bodies["Supplement"]
+    facts = {"order_amount_version": "1", "verified_fact_ref": "receipt-1",
+             "payment_splits": [cash], "actual_sale_at": date, "actual_handover_at": date}
+    case("external supplemental payment needs actual time", "Supplement",
+         without(supplement, "payment_occurred_at"), False)
+    case("wallet-only supplemental payment has server debit time", "Supplement",
+         with_field(without(supplement, "payment_occurred_at"),
+                    payment_splits=[with_field(cash, payment_method="wallet")]), True)
+    case("handover and sale times do not replace payment time", "TimeFacts", facts, False)
+    case("late product recovery with actual payment time", "TimeFacts",
+         with_field(facts, payment_occurred_at=date), True)
+    case("late product recovery with verified payment reference", "TimeFacts",
+         with_field(facts, payment_splits=[with_field(cash, external_collection_id="8")]), True)
+    case("late product recovery needs time for every unreferenced external split", "TimeFacts",
+         with_field(facts, payment_splits=[with_field(cash, external_collection_id="8"),
+                                           with_field(cash, payment_method="wechat")]), False)
+    for name, body in (("PaymentConfirm", payment), ("Supplement", supplement),
+                       ("TimeFacts", with_field(facts, payment_occurred_at=date))):
+        case(f"{name} rejects duplicate channels with distinct amounts", name,
+             with_field(body, payment_splits=[cash, with_field(cash, payment_amount="3.00")]), False)
+        case(f"{name} accepts different channels in either order", name,
+             with_field(body, payment_splits=[cash, with_field(cash, payment_method="wallet")]), True)
+
+    case("signed invite token is passed as issued", "InviteProof", {"invite_token": "fixture.token-1"}, True)
+    case("opaque invite token with extra spaces is rejected", "InviteProof",
+         {"invite_token": " fixture.token-1 "}, False)
+    case("opaque authentication token with a newline is rejected", "WeChatExchange",
+         {"wx_login_code": "fixture-token\n"}, False)
+    case("member name cannot be whitespace", "MemberName",
+         {"row_version": "1", "staff_display_name": "  "}, False)
+    case("local contact cannot consist of whitespace", "LocalCustomerInput",
+         {"customer_name": "李女士", "customer_contact_wechat": "  "}, False)
+    case("local contact can be a nonblank WeChat handle", "LocalCustomerInput",
+         {"customer_name": "李女士", "customer_contact_wechat": "wx-fixture"}, True)
+    case("product name cannot be whitespace", "ProductInput", with_field(product, product_name="  "), False)
+    case("evidence reference cannot be whitespace", "Supplement",
+         with_field(supplement, verified_fact_ref="  "), False)
+
+    normal = {"result": "no_obvious_issue"}
+    check_kinds = [
+        {"check_kind": "wash_groom", **dict.fromkeys(("skin", "ears", "eyes", "mouth", "nails", "coat"), normal)},
+        {"check_kind": "independent_care", "general": normal},
+    ]
+    for check in check_kinds:
+        section = "skin" if check["check_kind"] == "wash_groom" else "general"
+        start = {"service_record_version": "1", "pre_service_check_items": check}
+        case("normal service start", "StartService", start, True)
+        for outcome in ("abnormal", "unable_to_check"):
+            inspection = {"result": outcome, "note": "已如实告知"}
+            abnormal = with_field(check, **{section: inspection})
+            case("abnormal check needs owner decision", "StartService",
+                 with_field(start, pre_service_check_items=abnormal), False)
+            case("abnormal check needs nonblank explanation", "StartService",
+                 with_field(start, pre_service_check_items=with_field(
+                     check, owner_decision="continue", **{section: with_field(inspection, note=" ")})), False)
+            approved = with_field(abnormal, owner_decision="continue")
+            stopped = with_field(abnormal, owner_decision="stop")
+            case("owner authorized continuation", "StartService",
+                 with_field(start, pre_service_check_items=approved), True)
+            case("owner stop blocks service start", "StartService",
+                 with_field(start, pre_service_check_items=stopped), False)
+            case("record owner stop without starting service", "ServiceCancelInput",
+                 with_field(start, pre_service_check_items=stopped), True)
+            case("continue is not a stop record", "ServiceCancelInput",
+                 with_field(start, pre_service_check_items=approved), False)
+            item = {"pet_id": "1", "service_item_id": "2", "item_original_unit_price": "5.00",
+                    "pre_service_check_items": stopped}
+            quick = {"customer_id": "1", "entry_kind": "member", "items": [item]}
+            case("owner stop blocks fast order and automatic start", "QuickOrder", quick, False)
+            case("owner continue allows fast order and automatic start", "QuickOrder",
+                 with_field(quick, items=[with_field(item, pre_service_check_items=approved)]), True)
+
+    for outcome in ("abnormal", "unable_to_check"):
+        boarding = {"pet_id": "1", "item_original_unit_price": "5.00", "check_in_at": date,
+                    "expected_checkout_at": date, "boarding_admission_check_status": outcome,
+                    "boarding_admission_decision": "accepted"}
+        case("abnormal boarding intake needs a real note", "BoardingPetInput", boarding, False)
+        confirmed = with_field(boarding, boarding_admission_notes="已沟通")
+        case("accepted boarding intake carries its explanation", "NewBoarding",
+             {"customer_id": "1", "items": [confirmed]}, True)
+        case("declined boarding cannot create a stay", "NewBoarding",
+             {"customer_id": "1", "items": [with_field(confirmed, boarding_admission_decision="declined")]}, False)
+        case("declined boarding cannot convert an appointment to a stay", "VisitConversionInput",
+             {"appointment_version": "1", "boarded_pets": [
+                 with_field(confirmed, boarding_admission_decision="declined")
+             ]}, False)
+        declined = {"pet_id": "1", "boarding_admission_check_status": outcome,
+                    "boarding_admission_notes": "已沟通", "boarding_admission_decision": "declined"}
+        case("staff cancel can preserve declined intake", "StaffAppointmentCancelInput",
+             {"appointment_version": "1", "declined_boarding_checks": [declined]}, True)
+        case("declined intake still requires abnormality explanation", "StaffAppointmentCancelInput",
+             {"appointment_version": "1", "declined_boarding_checks": [
+                 without(declined, "boarding_admission_notes")
+             ]}, False)
+
+    for purpose, limit in (("store_front", 3145728), ("business_license", 10485760)):
+        for mime in ("image/jpeg", "image/png", "image/webp"):
+            intent = {"media_purpose": purpose, "mime_type": mime, "size_bytes": limit}
+            case(f"{purpose} format {mime} at limit", "MediaIntentInput", intent, mime != "image/webp")
+        case(f"{purpose} rejects 1 byte over its limit", "MediaIntentInput",
+             with_field(intent, mime_type="image/jpeg", size_bytes=limit + 1), False)
+    case("other media do not inherit the profile file cap", "MediaIntentInput",
+         {"media_purpose": "product_image", "mime_type": "image/webp", "size_bytes": 10485761}, True)
+
+    interrupted = {"service_record_id": "1", "order_id": "2", "pet_id": "3", "service_type": "wash",
+                   "service_customer_status": "interrupted", "service_summary": None,
+                   "service_result_version": None, "media": []}
+    photo = {"comparison_group": "full_body", "media_stage": "before", "media_asset_ref": "photo-1"}
+    case("interrupted customer response has no result", "CustomerService", interrupted, True)
+    for field, value in (("service_summary", "过程"), ("service_result_version", "1"), ("media", [photo])):
+        case(f"interruption hides {field}", "CustomerService", with_field(interrupted, **{field: value}), False)
+    case("in-progress customer service still shows authorized photos", "CustomerService",
+         with_field(interrupted, service_customer_status="in_progress", media=[photo]), True)
+
     operations = {operation["operationId"]: operation for methods in spec["paths"].values()
                   for operation in methods.values()}
     for name, status, code in BUSINESS_ERRORS:
         problem = operations[name]["responses"][str(status)]["content"]["application/problem+json"]
         case(f"{name} error {code} shape", "Problem", problem["examples"][code]["value"], True)
 
+    for response_name in ("InternalError", "PrivateInternalError"):
+        problem = spec["components"]["responses"][response_name]["content"]["application/problem+json"]["example"]
+        assert (problem["status"], problem["code"]) == (500, "INTERNAL_ERROR")
+        case(f"{response_name} safe HTTP 500 response", "Problem", problem, True)
+
     for label, name, payload, expected in cases:
         wrapper={"$schema":spec["jsonSchemaDialect"],"$ref":"#/components/schemas/"+name,
                  "components":{"schemas":spec["components"]["schemas"]}}
         validator=Draft202012Validator(wrapper,format_checker=FormatChecker())
-        passed=validator.is_valid(payload)
-        assert passed is expected, f"{label}: got {passed}, expected {expected}"
+        error = next(validator.iter_errors(payload), None)
+        passed = error is None
+        assert passed is expected, f"{label}: got {passed}, expected {expected}; {error and error.message}"
     print(f"{len(cases)} JSON Schema request and response examples passed.")
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--standards", action="store_true", help="also uses OpenAPI and JSON Schema validators")
-    parser.add_argument("--v001", type=Path, help="also compares the appointment and refund enums to the pinned V001 SQL")
+    parser.add_argument("--v001", type=Path, help="also checks database constraints in the pinned V001 SQL")
     args=parser.parse_args()
     spec=json.loads((CONTRACTS/"openapi.batch-a.json").read_text(encoding="utf-8"))
     check_structure(spec)

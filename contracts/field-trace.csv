@@ -1,8 +1,8 @@
-﻿api_property,registered_field_ids,status,mapping_class,schemas,note
+api_property,registered_field_ids,status,mapping_class,schemas,note
 access_token,,,transport_or_projection,Session,小程序受众的不透明会话凭证，技术字段。
 acknowledged,,,transport_or_projection,Ack,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 active_boarding,,,transport_or_projection,Workbench,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-active_proposal,,,transport_or_projection,AppointmentSummary,仅从同店同客同预约、当前有效的 pending change 修订读取。门店提出等顾客，顾客提出等门店。初始修订、到期或已关闭修订不参与；原已确认时间和服务项目不被提议覆盖。
+active_proposal,,,transport_or_projection,AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,仅从同店同客同预约、当前有效的 pending change 修订读取。门店提出等顾客，顾客提出等门店。初始修订、到期或已关闭修订不参与；原已确认时间和服务项目不被提议覆盖。
 active_service,,,transport_or_projection,Workbench,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 actual_checkout_at,F-BOARD-005,S,registry,CheckoutTime | CustomerBoarding | StoreBoarding,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 actual_handover_at,,,candidate_binding,TimeFacts,阶段 08/09 核对映射并登记后发布。
@@ -10,14 +10,14 @@ actual_sale_at,,,candidate_binding,TimeFacts,阶段 08/09 核对映射并登记�
 ad_grant_id,,,candidate_binding,AiReportRequest,阶段 08/09 核对映射并登记后发布。
 ai_report_content,F-SVC-015,S,registry,AiReport,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 ai_report_status,F-SVC-013,S,registry,AiReport,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-applicable_scope,F-CPN-009,C,registry,CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-appointment_cancel_reason,F-APPT-016,S,registry,AppointmentSummary,只读取消类别；按同店原预约终止审计 action_key=appointment.mark_no_show 投影 no_show，其他为 null；不新增 V001 列或写入口。
-appointment_id,F-APPT-001,S,registry,AppointmentSummary | MessageTarget,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-appointment_status,F-APPT-003,C,registry,AppointmentSummary,V001 基础状态六值直出；仅 pending／confirmed 有有效 active_proposal 时按提出方派生 awaiting_customer（staff）或 awaiting_store（customer），派生值不入库。拒绝原申请 rejected，确认超时 expired，核实未到店 cancelled。
-appointment_type,F-APPT-002,C,registry,AppointmentInput | AppointmentSummary,F-APPT-002，对外 wash/groom/boarding，V001 内部 wash_groom/boarding 按快照保存和回读原分类。
-appointment_version,F-APPT-022,S,registry,AppointmentReject | AppointmentReply | AppointmentReschedule | AppointmentSummary | AppointmentVersion | StartService | VisitConversionInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+applicable_scope,F-CPN-009,C,registry,CouponTemplateTerms | CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+appointment_cancel_reason,F-APPT-016,S,registry,AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,只读取消类别；按同店原预约终止审计 action_key=appointment.mark_no_show 投影 no_show，其他为 null；不新增 V001 列或写入口。
+appointment_id,F-APPT-001,S,registry,AppointmentSummary | CustomerAppointmentDetail | MessageTarget | StaffAppointmentDetail | StaffAppointmentSummary,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+appointment_status,F-APPT-003,C,registry,AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,V001 基础状态六值直出；仅 pending／confirmed 有有效 active_proposal 时按提出方派生 awaiting_customer（staff）或 awaiting_store（customer），派生值不入库。拒绝原申请 rejected，确认超时 expired，核实未到店 cancelled。
+appointment_type,F-APPT-002,C,registry,AppointmentInput | AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,F-APPT-002，对外 wash/groom/boarding，V001 内部 wash_groom/boarding 按快照保存和回读原分类。
+appointment_version,F-APPT-022,S,registry,AppointmentReject | AppointmentReply | AppointmentReschedule | AppointmentSummary | AppointmentVersion | CustomerAppointmentDetail | StaffAppointmentCancelInput | StaffAppointmentDetail | StaffAppointmentSummary | StartService | VisitConversionInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 arrival_at,,,transport_or_projection,MatchAppointmentInput,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-audit_reason,F-AUD-009,C,registry,AmountVersion | AppointmentVersion | BoardingRate | ConfirmProductRequest | CouponGrant | CouponRemove | InventoryAdjust | MemberChange | PerformanceAttribution | ProductRequestEdit | ServiceTransition | Supplement,选填原因用 OptionalReason；省略、null、空串和全空白统一保存为 NULL；有文字去首尾空白后留原意。
+audit_reason,F-AUD-009,C,registry,AmountVersion | AppointmentVersion | BoardingRate | CheckoutTimeCorrection | ConfirmProductRequest | CouponGrant | CouponRemove | InventoryAdjust | MemberChange | MemberName | PerformanceAttribution | ProductRequestEdit | ServiceCancelInput | ServiceResultEdit | ServiceTransition | StaffAppointmentCancelInput | Supplement,选填原因用 OptionalReason；省略、null、空串和全空白统一保存为 NULL；有文字去首尾空白后留原意。
 available_balance,F-WAL-002,C,registry,CustomerWallet | StaffWallet,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 available_coupon_count,F-WAL-005,C,registry,CustomerWallet | StaffWallet,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 available_inventory_qty,F-PROD-008,S,registry,ProductStaff,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -26,17 +26,17 @@ balance_change_type,F-WAL-007,C,registry,OwnWalletLedgerRow,本人钱包流水�
 balance_delta,F-WAL-009,C,registry,OwnWalletLedgerRow,本人钱包流水投影；按对象选择正式字段。
 balance_ledger_id,F-WAL-006,S,registry,OwnWalletLedgerRow,本人钱包流水投影；按对象选择正式字段。
 boarded_pets,,,transport_or_projection,VisitConversionInput,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-boarding_admission_check_status,F-BOARD-022,S,registry,BoardingPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-boarding_admission_decision,F-BOARD-024,S,registry,BoardingPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-boarding_admission_notes,F-BOARD-023,S,registry,BoardingPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+boarding_admission_check_status,F-BOARD-022,S,registry,BoardingPetInput | DeclinedBoardingCheck,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+boarding_admission_decision,F-BOARD-024,S,registry,BoardingPetInput | DeclinedBoardingCheck,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+boarding_admission_notes,F-BOARD-023,S,registry,BoardingPetInput | DeclinedBoardingCheck,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 boarding_belongings,F-BOARD-021,S,registry,BoardingPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 boarding_billable_nights,F-BOARD-029,S,registry,CustomerBoarding | StoreBoarding,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-boarding_checkout_at,F-APPT-010,S,registry,ActiveProposal | AppointmentInput | AppointmentReschedule | AppointmentSummary,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+boarding_checkout_at,F-APPT-010,S,registry,ActiveProposal | AppointmentInput | AppointmentReschedule | AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 boarding_checkout_confirmed_at,F-BOARD-030,S,registry,StoreBoarding,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 boarding_event_content,F-BOARD-011,C,registry,BoardingCare | BoardingCareEdit | BoardingCareInput | CustomerCare,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 boarding_event_id,F-BOARD-007,S,registry,BoardingCare | CustomerCare,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 boarding_event_media_refs,F-BOARD-012,S,registry,BoardingCare | BoardingCareEdit | BoardingCareInput | CustomerCare,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-boarding_event_type,F-BOARD-008,C,registry,BoardingCare | BoardingCareEdit | BoardingCareInput | CustomerCare,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+boarding_event_type,F-BOARD-008,C,registry,BoardingCare | BoardingCareEdit | BoardingCareInput | CustomerCare,F-BOARD-008 的 cleaning 对应现有 API 和 V001 的 cage_cleaning；均只表示清扫笼子。
 boarding_event_visibility,F-BOARD-025,S,registry,BoardingCare | BoardingCareEdit | BoardingCareInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 boarding_feed_enabled,F-PROD-012,C,registry,ProductEdit | ProductInput | ProductPublic | ProductStaff,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 boarding_health_material_refs,F-BOARD-032,S,registry,BoardingPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -63,7 +63,7 @@ code,,,transport_or_projection,Problem,DTO 容器／视图或技术名称，纳�
 comparison_group,,,transport_or_projection,ServicePhoto,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 confirmed,,,transport_or_projection,RebindConfirm,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 confirmed_quantity,F-ORD-007,S,registry,ConfirmProductRequestLine | OrderItem,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-confirmed_start_at,,,candidate_binding,AppointmentSummary,V001 appointment.confirmed_start_at，已确认有效时段，改期提议不能覆盖。
+confirmed_start_at,,,candidate_binding,AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,V001 appointment.confirmed_start_at，已确认有效时段，改期提议不能覆盖。
 consumption_paid,,,transport_or_projection,Performance,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 consumption_refunded,,,transport_or_projection,Performance,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 context,,,transport_or_projection,Session,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
@@ -73,23 +73,25 @@ coupon_instance_id,F-CPN-002,S,registry,Coupon | CouponLockInput | Settlement,�
 coupon_instance_ids,,,transport_or_projection,CouponMutation | CouponRemove,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 coupon_lock_token,,,candidate_binding,CouponLock | CouponUnlock | PaymentConfirm | WaiveConfirm,V001 coupon_settlement_lock.lock_token；按原单和当前角色校验，短期机密。
 coupon_name,F-CPN-003,C,registry,Coupon | CouponTemplate | CouponTemplateEdit | CouponTemplateInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+coupon_note,F-CPN-018,C,registry,CouponTemplate | CouponTemplateEdit | CouponTemplateInput,授权门店模板选填备注，顾客券实例不含。
 coupon_source_type,F-CPN-014,S,registry,Coupon,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 coupon_status,F-CPN-013,S,registry,Coupon,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 coupon_template_id,F-CPN-001,S,registry,Coupon | CouponGrantLine | CouponTemplate | InviteCodeInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-coupon_type,F-CPN-004,C,registry,CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+coupon_type,F-CPN-004,C,registry,CouponTemplateTerms | CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 created_at,F-CORE-013,S,registry,Message | OrderListRow | OwnWalletLedgerRow | Recharge | StatsOrder,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 current_version,,,transport_or_projection,Problem,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 customer_binding_status,F-AUTH-005,S,registry,StoreCustomer,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-customer_contact_mobile,F-CUST-001,C,registry,LocalCustomerInput | StoreCustomer,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-customer_contact_wechat,F-CUST-002,C,registry,LocalCustomerInput | StoreCustomer,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-customer_id,F-CORE-004 | F-APPT-004 | F-MSG-005,C | C | C,registry,MatchAppointmentInput | NewBoarding | QuickOrder | QuickProductOrder | Recharge | StaffOrder | StaffWallet | StoreBoarding | StoreCustomer,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-customer_name,,,transport_or_projection,LocalCustomerInput | StatsOrder | StoreCustomer,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+customer_contact_mobile,F-CUST-001,C,registry,LocalCustomerInput | StaffAppointmentDetail | StoreCustomer,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+customer_contact_wechat,F-CUST-002,C,registry,LocalCustomerInput | StaffAppointmentDetail | StoreCustomer,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+customer_id,F-CORE-004 | F-APPT-004 | F-MSG-005,C | C | C,registry,MatchAppointmentInput | NewBoarding | QuickOrder | QuickProductOrder | Recharge | StaffAppointmentDetail | StaffOrder | StaffWallet | StoreBoarding | StoreCustomer,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+customer_name,,,transport_or_projection,LocalCustomerInput | StaffAppointmentDetail | StaffAppointmentSummary | StatsOrder | StoreCustomer,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 customer_visible_status,F-ORD-004,C,registry,OrderListRow,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 decision,,,transport_or_projection,AppointmentReply,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+declined_boarding_checks,,,transport_or_projection,StaffAppointmentCancelInput,原寄养预约拒绝接收记录的请求容器，不创建入住。
 detail,,,transport_or_projection,Problem,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 different_visit_confirmed,,,candidate_binding,QuickOrder,阶段 08/09 核对映射并登记后发布。
-discount_amount,F-CPN-005,C,registry,CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-discount_rate,F-CPN-006,C,registry,CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+discount_amount,F-CPN-005,C,registry,CouponTemplateTerms | CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+discount_rate,F-CPN-006,C,registry,CouponTemplateTerms | CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 download_url,,,transport_or_projection,MediaDownload,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 duplicate_intake_ids,,,transport_or_projection,StockIntakeDraft,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 duplicate_warning_acknowledged,,,transport_or_projection,StockIntakeConfirm,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
@@ -103,7 +105,7 @@ expected_checkout_at,F-BOARD-004,S,registry,BoardingPetInput | CustomerBoarding 
 expires_at,F-ENT-009,C,registry,MediaDownload | MediaUpload | MobileChallenge | RebindChallenge | Session,按对象语义区分，令牌有效期由阶段 11 配置。
 external_collection_id,,,candidate_binding,ExternalReceiptResult | Tender,V001 external_collection_evidence.external_collection_id；对应外部真实同笔分摊证据。
 eyes,,,transport_or_projection,WashPrecheck,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-final_receivable_amount,F-ORD-014,C,registry,AmountEdit | ConfirmProductRequest | CustomerSettlement | OrderListRow | PaymentConfirm | ProductRequestEdit | QuickProductOrder | ServiceTransition | Settlement | StatsOrder,PaymentConfirm 本字段仅断言锁定应收；不一致返回 409 RECEIVABLE_AMOUNT_CONFLICT。待结算调价沿原接口及版本；其他 DTO 按所属业务投影。
+final_receivable_amount,F-ORD-014,C,registry,AmountEdit | ConfirmProductRequest | CustomerSettlement | OrderListRow | PaymentConfirm | ProductRequestEdit | QuickProductOrder | ServiceCancelInput | ServiceTransition | Settlement | StatsOrder,PaymentConfirm 本字段仅断言锁定应收；不一致返回 409 RECEIVABLE_AMOUNT_CONFLICT。待结算调价沿原接口及版本；其他 DTO 按所属业务投影。
 general,,,transport_or_projection,CarePrecheck,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 inventory_status,F-PROD-007,C,registry,ProductPublic | ProductStaff,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 invite_code,F-INV-002,C,registry,InviteCode | InviteCodeRedeem,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -118,7 +120,7 @@ item_name,,,transport_or_projection,OrderItem,DTO 容器／视图或技术名称
 item_names,,,transport_or_projection,StatsOrder,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 item_original_amount,F-ORD-009,S,registry,OrderItem,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 item_original_unit_price,F-ORD-008,S,registry,BoardingPetInput | BoardingRate | CareAddon | FastOrderPet | OrderItem | StoreBoarding,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-items,,,transport_or_projection,ActiveProposal | AppointmentInput | AppointmentList | AppointmentReschedule | AppointmentSummary | Cart | CartInput | CategoryList | CheckoutBatch | ConfirmProductRequest | CouponGrant | CouponList | CouponTemplateList | CustomerBoardingList | CustomerOrder | CustomerOrderList | HoldList | MatchAppointmentHint | MemberList | MessageList | NewBoarding | OwnWalletLedgerPage | OwnerPetList | ProductPublicList | ProductRequestEdit | ProductRequestInput | ProductStaffList | PublicServiceList | QuickOrder | QuickProductOrder | RechargeList | ServiceList | StaffOrder | StaffOrderList | StaffServiceList | StatsOrders | StockIntakeConfirm | StockIntakeDraft | StockIntakeList | StoreBoardingList | StoreBriefList | StoreCustomerList,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+items,,,transport_or_projection,ActiveProposal | AppointmentInput | AppointmentList | AppointmentReschedule | AppointmentSummary | Cart | CartInput | CategoryList | CheckoutBatch | CheckoutTimeCorrection | ConfirmProductRequest | CouponGrant | CouponList | CouponTemplateList | CustomerAppointmentDetail | CustomerBoardingList | CustomerOrder | CustomerOrderList | HoldList | MatchAppointmentHint | MemberList | MessageList | NewBoarding | OwnWalletLedgerPage | OwnerPetList | ProductPublicList | ProductRequestEdit | ProductRequestInput | ProductStaffList | PublicServiceList | QuickOrder | QuickProductOrder | RechargeList | ServiceList | StaffAppointmentDetail | StaffAppointmentList | StaffAppointmentSummary | StaffOrder | StaffOrderList | StaffServiceList | StatsOrders | StockIntakeConfirm | StockIntakeDraft | StockIntakeList | StoreBoardingList | StoreBriefList | StoreCustomerList,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 jump_target,F-MSG-015,C,registry,Message,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 kind,,,transport_or_projection,MessageTarget | WorkflowEntry,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 label,,,transport_or_projection,SkuSpec,DTO 包装。
@@ -128,7 +130,7 @@ lock_expires_at,,,transport_or_projection,CouponLock,DTO 容器／视图或技�
 manual_adjustment_amount,F-ORD-013,C,registry,CustomerSettlement | Settlement,F-ORD-013，原应收与最终应收已确定时读取 V001 生成列；券明细在核销快照。
 manual_adjustment_reason,F-ORD-018,C,registry,AmountEdit,调价原因用 OptionalReason；省略、null、空串和全空白统一保存为 NULL。
 match_token,,,candidate_binding,MatchAppointmentHint | QuickOrder,阶段 08/09 核对映射并登记后发布。
-max_discount_amount,F-CPN-008,C,registry,CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+max_discount_amount,F-CPN-008,C,registry,CouponTemplateTerms | CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 media,,,transport_or_projection,CustomerService | FinishService | ServiceResultEdit | StaffService,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 media_asset_ref,F-PET-041,S,registry,ServicePhoto,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 media_id,,,candidate_binding,MediaUpload,媒体用途和归属标识，待登记存储后开放。
@@ -140,18 +142,18 @@ message_summary,F-MSG-009,C,registry,Message,按对象上下文选定原唯一�
 message_title,F-MSG-008,C,registry,Message,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 message_type,F-MSG-007,C,registry,Message,F-MSG-007，业务消息类型，与两档优先级独立。
 mime_type,,,transport_or_projection,MediaIntentInput,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-minimum_spend,F-CPN-007,C,registry,CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+minimum_spend,F-CPN-007,C,registry,CouponTemplateTerms | CouponTerms,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 mouth,,,transport_or_projection,WashPrecheck,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 nails,,,transport_or_projection,WashPrecheck,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 net_consumption,,,transport_or_projection,Performance,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-new_abnormality_note,,,transport_or_projection,FinishService,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+new_abnormality_note,F-SVC-011,C,registry,FinishService,完成检查中发现新增异常的说明，沿 F-SVC-011，不另造异常字段。
 new_product,,,transport_or_projection,IntakeLine,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-next_cursor,,,transport_or_projection,AppointmentList | CategoryList | CouponList | CouponTemplateList | CustomerBoardingList | CustomerOrderList | HoldList | MemberList | MessageList | OwnWalletLedgerPage | OwnerPetList | ProductPublicList | ProductStaffList | PublicServiceList | RechargeList | ServiceList | StaffOrderList | StaffServiceList | StatsOrders | StockIntakeList | StoreBoardingList | StoreBriefList | StoreCustomerList,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+next_cursor,,,transport_or_projection,AppointmentList | CategoryList | CouponList | CouponTemplateList | CustomerBoardingList | CustomerOrderList | HoldList | MemberList | MessageList | OwnWalletLedgerPage | OwnerPetList | ProductPublicList | ProductStaffList | PublicServiceList | RechargeList | ServiceList | StaffAppointmentList | StaffOrderList | StaffServiceList | StatsOrders | StockIntakeList | StoreBoardingList | StoreBriefList | StoreCustomerList,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 note,,,transport_or_projection,Inspection,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 occurred_at,F-BOARD-009,C,registry,BoardingCare | BoardingCareEdit | BoardingCareInput | CustomerCare | ExternalReceipt | ExternalReceiptResult | OwnWalletLedgerRow | Recharge | RechargeInput | RechargeRefund | RechargeRefundInput | WorkflowEntry,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 on_hand_inventory_qty,F-PROD-026,S,registry,InventoryAdjust | ProductStaff,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 order,,,transport_or_projection,CustomerOrder | StaffOrder,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-order_amount_version,F-ORD-032,S,registry,AmountEdit | AmountVersion | BoardingRate | CareAddon | CheckoutBatch | ConfirmProductRequest | CouponLockInput | CouponUnlock | HoldContact | PaymentConfirm | PerformanceAttribution | ProductRequestEdit | ProductReturnInput | RefundConfirm | RefundDraftClose | RefundDraftCreate | RefundDraftEdit | ServiceTransition | Settlement | StaffOrder | StaffService | StoreBoarding | Supplement | TimeFacts | WaiveConfirm,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+order_amount_version,F-ORD-032,S,registry,AmountEdit | AmountVersion | BoardingRate | CareAddon | CheckoutBatch | CheckoutTimeCorrection | ConfirmProductRequest | CouponLockInput | CouponUnlock | HoldContact | PaymentConfirm | PerformanceAttribution | ProductRequestEdit | ProductReturnInput | RefundConfirm | RefundDraftClose | RefundDraftCreate | RefundDraftEdit | ServiceCancelInput | ServiceTransition | Settlement | StaffOrder | StaffService | StoreBoarding | Supplement | TimeFacts | WaiveConfirm,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 order_collection_contacted_at,F-ORD-037,S,registry,HoldContact,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 order_collection_note,F-ORD-036,S,registry,HoldContact,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 order_held_at,F-ORD-035,S,registry,Settlement,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -163,11 +165,11 @@ order_on_hold,F-ORD-034,C,registry,Settlement,F-ORD-034，由 V001 is_on_hold �
 order_performance_staff_id,F-ORD-038,S,registry,ConfirmProductRequest | PerformanceAttribution | StaffOrder,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 order_type,F-ORD-002,S,registry,OrderListRow | StatsOrder,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 original_receivable_amount,F-ORD-010,C,registry,CustomerSettlement | OrderListRow | Settlement,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-owner_decision,,,transport_or_projection,CarePrecheck | WashPrecheck,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+owner_decision,,,transport_or_projection,CarePrecheck | StartablePrecheck | StoppedPrecheck | WashPrecheck,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 paid_amount,F-ORD-015,C,registry,CustomerSettlement | OrderListRow | Settlement | StatsOrder,F-ORD-015，从真实收款及补收事实聚合。
 payment_amount,F-PAY-004,C,registry,Tender,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-payment_method,F-PAY-003,C,registry,ExternalReceipt | ExternalReceiptResult | PaymentConfirm | RechargeInput | Tender,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-payment_occurred_at,F-PAY-018,S,registry,PaymentConfirm | Supplement,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+payment_method,F-PAY-003,C,registry,ExternalReceipt | ExternalReceiptResult | PaymentConfirm | RechargeInput | Supplement | Tender | TimeFacts,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+payment_occurred_at,F-PAY-018,S,registry,PaymentConfirm | Supplement | TimeFacts,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 payment_record_id,F-PAY-001,S,registry,PaymentResult,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 payment_splits,,,transport_or_projection,PaymentConfirm | Supplement | TimeFacts,聚合传输容器；渠道、金额沿 F-PAY-003/004，禁止提交钱包本金/赠送拆分。
 payment_status,F-ORD-017,S,registry,CustomerSettlement | OrderListRow | Settlement,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -175,16 +177,16 @@ pending_appointment,,,transport_or_projection,Workbench,DTO 容器／视图或�
 pending_product,,,transport_or_projection,Workbench,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 pet_avatar,F-PET-004,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 pet_birth_date,F-PET-007,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-pet_breed,F-PET-005,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput | Pet | StorePetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-pet_id,F-PET-001 | F-ORD-030,C | C,registry,AppointmentPet | BoardingPetInput | CustomerBoarding | CustomerService | FastOrderPet | OrderItem | OwnerPet | Pet | StaffService | StoreBoarding,F-PET-001。顾客路由指向 owner_pet，店员路由指向 store_pet；校验关联，不能互换。
+pet_breed,F-PET-005,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput | Pet | StaffAppointmentPetDetail | StorePetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+pet_id,F-PET-001 | F-ORD-030,C | C,registry,AppointmentPet | BoardingPetInput | CustomerBoarding | CustomerService | DeclinedBoardingCheck | FastOrderPet | OrderItem | OwnerPet | Pet | StaffAppointmentPet | StaffAppointmentPetDetail | StaffService | StoreBoarding,F-PET-001。顾客路由指向 owner_pet，店员路由指向 store_pet；校验关联，不能互换。
 pet_ids,F-APPT-005 | F-FEED-004,C | C,registry,MatchAppointmentInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-pet_name,F-PET-002,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput | Pet | StorePetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+pet_name,F-PET-002,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput | Pet | StaffAppointmentPet | StaffAppointmentPetDetail | StorePetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 pet_sex,F-PET-006,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-pet_type,F-PET-003,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput | Pet | StorePetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+pet_type,F-PET-003,C,registry,OwnerPet | OwnerPetEdit | OwnerPetInput | Pet | StaffAppointmentPetDetail | StorePetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 pets,,,transport_or_projection,StoreCustomer,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 platform_user_id,F-CORE-001 | F-AD-002,S | S,registry,UserContext,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 post_service_has_new_abnormality,F-SVC-022,C,registry,FinishService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-pre_service_check_items,F-SVC-020,C,registry,FastOrderPet | StartService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+pre_service_check_items,F-SVC-020,C,registry,FastOrderPet | ServiceCancelInput | StartService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 principal_balance,F-WAL-003,C,registry,CustomerWallet | StaffWallet,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 principal_delta,F-WAL-011,C,registry,OwnWalletLedgerRow,本人钱包流水投影；按对象选择正式字段。
 product_category_id,F-PROD-003,S,registry,Category | ProductEdit | ProductInput | ProductPublic | ProductStaff,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -214,7 +216,7 @@ refund_allocations,,,transport_or_projection,RefundDraft | RefundDraftCreate | R
 refund_amount,F-ORD-016,C,registry,CustomerSettlement | OrderListRow | Settlement,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 refund_method,F-PAY-014,S,registry,RefundTender,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 refund_method_amount,F-PAY-015,S,registry,RefundTender,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-refund_mode,,,transport_or_projection,RechargeRefund | RechargeRefundInput,充值退款输入必填，输出同值；standard／owner_manual 一一对应 V001 wallet_recharge_refund.refund_mode。服务端按原赠送权益历史和当前老板资格校验，不自动切换。
+refund_mode,,,candidate_binding,RechargeRefund | RechargeRefundInput,V001 wallet_recharge_refund.refund_mode；原赠送权益使用记录决定 standard/owner_manual 可用性，发布前登记。
 refund_reason,F-PAY-008,S,registry,RefundConfirm,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 refund_record_id,F-PAY-007,S,registry,RefundResult,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 refund_request_id,F-PAY-010,S,registry,RefundDraft,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -223,17 +225,17 @@ refund_requested_amount,F-PAY-011,C,registry,RefundDraft | RefundResult,按对�
 refunded_at,F-PAY-009,S,registry,RefundConfirm,消费退款确认为必填真实发生时间，写入 V001 refund_record.refunded_at；与服务端入账及审计时间分开。
 request_id,,,transport_or_projection,Problem,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 requested_quantity,F-ORD-006,S,registry,OrderItem | ProductRequestLine,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-requested_start_at,F-APPT-009,S,registry,ActiveProposal | AppointmentInput | AppointmentReschedule | AppointmentSummary,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+requested_start_at,F-APPT-009,S,registry,ActiveProposal | AppointmentInput | AppointmentReschedule | AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 resale_qty,,,candidate_binding,ProductReturnInput | ProductReturnResult,阶段 08/09 核对映射并登记后发布。
 reschedule_proposal_expires_at,F-APPT-026,S,registry,ActiveProposal,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 reschedule_proposal_id,F-APPT-021,S,registry,ActiveProposal,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-reschedule_proposed_by_actor_type,F-APPT-024,S,registry,ActiveProposal,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+reschedule_proposed_by_actor_type,F-APPT-024,S,registry,ActiveProposal | AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 reserved_inventory_qty,F-PROD-009,S,registry,ProductStaff,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 resource_id,,,transport_or_projection,WorkflowEntry,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-result,,,transport_or_projection,Inspection,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+result,,,transport_or_projection,CarePrecheck | Inspection | WashPrecheck,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 returned_principal,,,candidate_binding,RechargeRefund | RechargeRefundInput,阶段 08/09 核对映射并登记后发布。
 returned_qty,,,candidate_binding,ProductReturnInput | ProductReturnResult,阶段 08/09 核对映射并登记后发布。
-review_status,,,transport_or_projection,StockIntakeSuggestion,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+review_status,,,candidate_binding,StockIntakeSuggestion,AI 入库识别行的待补/已匹配/候选状态，区别平台审核和正式入库状态，发布前登记。
 role_key,F-CORE-007,S,registry,Member | RoleContext,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 row_version,F-REV-003,C,registry,BoardingCare | BoardingCareEdit | BoardingRate | Cart | CartInput | CheckoutTime | CouponTemplate | CouponTemplateEdit | InventoryAdjust | Member | MemberChange | MemberName | OwnerPet | OwnerPetEdit | ProductEdit | ProductRequestInput | ProductReturnResult | ProductStaff | RechargeInput | RechargeRefundInput | StaffWallet | StoreBoarding | StoreCustomer,按 API 对应 V001 的资源版本，属于工程并发字段；避免套用平台审核版本语义。
 sale_price,F-PROD-006,C,registry,ProductEdit | ProductInput | ProductPublic | ProductStaff,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -243,13 +245,13 @@ service_customer_status,F-SVC-003,C,registry,CustomerService,按对象上下文�
 service_internal_status,F-SVC-004,S,registry,StaffService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_item_description,F-SITEM-004,C,registry,PublicServiceItem | ServiceItem | ServiceItemEdit | ServiceItemInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_item_enabled,F-SITEM-001,S,registry,ServiceItem,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-service_item_id,F-APPT-008,S,registry,AppointmentPet | CareAddon | FastOrderPet | InviteCodeInput | OrderItem | PublicServiceItem | ServiceItem,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+service_item_id,F-APPT-008,S,registry,AppointmentPet | CareAddon | FastOrderPet | InviteCodeInput | OrderItem | PublicServiceItem | ServiceItem | StaffAppointmentPet | StaffAppointmentPetDetail,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_item_ids,,,transport_or_projection,CouponScope,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 service_item_name,F-SITEM-003,C,registry,PublicServiceItem | ServiceItem | ServiceItemEdit | ServiceItemInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_item_version,F-SITEM-002,S,registry,ServiceItem | ServiceItemChange | ServiceItemEdit,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_record_id,F-PET-037 | F-SVC-001,C | S,registry,CustomerService | MessageTarget | StaffService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_record_ids,,,transport_or_projection,StaffOrder,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-service_record_version,F-SVC-019,S,registry,FinishService | ServiceResultEdit | ServiceTransition | StaffService | StartService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+service_record_version,F-SVC-019,S,registry,FinishService | ServiceCancelInput | ServiceResultEdit | ServiceTransition | StaffService | StartService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_result_version,F-SVC-023,S,registry,CustomerService | ServiceViewed,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_started_at,F-SVC-005,S,registry,StaffService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 service_summary,F-SVC-008,C,registry,CustomerService | FinishService | ServiceResultEdit | StaffService,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -258,7 +260,7 @@ settled_at,F-ORD-023,S,registry,CustomerSettlement | Settlement,按对象上下�
 settlement,,,transport_or_projection,CouponLock | PaymentResult | RefundResult,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 settlement_id,,,candidate_binding,CustomerSettlement | RefundDraft | Settlement | StoreBoarding,V001 order_settlement.settlement_id；同原单的独立结算范围标识，申请登记后发布。
 settlement_scope,,,transport_or_projection,Settlement,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-settlement_status,,,transport_or_projection,Settlement,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+settlement_status,,,candidate_binding,Settlement,V001 order_settlement.settlement_status 原范围状态；区别 F-ORD-017 订单付款/退款状态，发布前登记。
 settlements,,,transport_or_projection,CustomerOrder | StaffOrder,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 size_bytes,,,transport_or_projection,MediaIntentInput,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 skin,,,transport_or_projection,WashPrecheck,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
@@ -266,7 +268,7 @@ sku_id,F-PROD-002,C,registry,CartLine | CartLineInput | IntakeLine | InviteCodeI
 sku_ids,,,transport_or_projection,CouponScope,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 sku_spec_values,F-PROD-011,S,registry,ProductEdit | ProductInput | ProductPublic | ProductStaff | StockIntakeSuggestion,F-PROD-011；可空单规格结构，映射 V001 product_sku.spec_label，未说明的物理值为空串。
 special_care,F-PET-025,C,registry,BoardingPetInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-special_request,F-APPT-012,C,registry,AppointmentInput,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+special_request,F-APPT-012,C,registry,AppointmentInput | CustomerAppointmentDetail | StaffAppointmentDetail,原预约申请及获授权详情，顾客仅本人；门店仅当前本店有权记录。
 staff_context,,,transport_or_projection,UserContext,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 staff_display_name,F-STAFF-015,C,registry,InviteAccept | Member | MemberName | StaffDirectoryEntry,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 staff_id,F-CORE-005,C,registry,Member | RoleContext | StaffDirectoryEntry,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
@@ -288,9 +290,9 @@ store_business_hours,F-STORE-012,C,registry,BusinessHours | BusinessSettings,按
 store_business_license_ref,F-STORE-004,C,registry,StoreSetup,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 store_business_settings_version,F-STORE-014,S,registry,BusinessSettings,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 store_front_photo_ref,F-STORE-001,C,registry,StoreBrief | StoreSetup,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-store_id,F-CORE-003 | F-AD-014,C | C,registry,AppointmentSummary | InvitePreview | MessageTarget | OrderListRow | RoleContext | StoreBrief,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
+store_id,F-CORE-003 | F-AD-014,C | C,registry,AppointmentSummary | CustomerAppointmentDetail | InvitePreview | MessageTarget | OrderListRow | RoleContext | StaffAppointmentDetail | StaffAppointmentSummary | StoreBrief,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 store_name,F-STORE-002,C,registry,InvitePreview | StoreBrief | StoreSetup,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-store_response_reason,F-APPT-014,S,registry,ActiveProposal | AppointmentReject | AppointmentReschedule | AppointmentSummary,门店拒绝预约或建议改期输入用 OptionalReason；省略、null、空串和全空白统一保存为 NULL；响应展示真实文本或 null。
+store_response_reason,F-APPT-014,S,registry,ActiveProposal | AppointmentReject | AppointmentReschedule | AppointmentSummary | CustomerAppointmentDetail | StaffAppointmentDetail | StaffAppointmentSummary,门店拒绝预约或建议改期输入用 OptionalReason；省略、null、空串和全空白统一保存为 NULL；响应展示真实文本或 null。
 store_temporary_closures,F-STORE-013,C,registry,BusinessHours | BusinessSettings,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 tags,,,transport_or_projection,Inspection,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 terms,,,transport_or_projection,Coupon | CouponTemplate | CouponTemplateEdit | CouponTemplateInput,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
@@ -300,8 +302,8 @@ type,,,transport_or_projection,Problem,DTO 容器／视图或技术名称，纳�
 upload_url,,,transport_or_projection,MediaUpload,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
 valid_from,F-CPN-010,S,registry,Coupon,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 valid_until,F-CPN-011,C,registry,Coupon,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
-validity_days,,,transport_or_projection,CouponTerms,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
-verified_amount,,,transport_or_projection,ExternalReceipt | ExternalReceiptResult,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+validity_days,,,transport_or_projection,CouponTemplateTerms | CouponTerms,DTO 容器／视图或技术名称，纳入接口评审；业务字段发布前按注册规则。
+verified_amount,,,candidate_binding,ExternalReceipt | ExternalReceiptResult,V001 external_collection_evidence.verified_amount 是一笔已核实线下付款的可分摊上限，区别单个订单实收，发布前登记。
 verified_fact_ref,,,candidate_binding,Supplement | TimeFacts,补收和超期补记证据引用，须核实关联及权限，待登记生命周期。
 verified_mobile,F-AUTH-001,C,registry,InvitePreview | StaffDirectoryEntry,按对象上下文选定原唯一字段；多 ID 时只复用所属业务域。
 waiver_reason,F-AUD-009,C,registry,WaiveConfirm,免单原因输入，使用 RequiredReason，保存到原免单审计 audit_reason。
