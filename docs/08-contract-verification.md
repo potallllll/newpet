@@ -2,29 +2,31 @@
 
 ## 实际执行
 
-从仓库根目录运行。Python 使用 `openapi-spec-validator==0.7.2` 及其 JSON Schema 依赖。V001 参数使用阶段 09 终审包中的 SQL 路径，脚本会核对文件指纹。
-
-首次复跑可用 `python -m pip install --target (Join-Path $env:TEMP 'newpet-stage08-openapi-validator') 'openapi-spec-validator==0.7.2'` 安装依赖。若只检验本仓库契约，运行 `python -B tests/verify_contract.py --standards`。
+从仓库根目录运行。依赖见 [tests/requirements-contract.txt](../tests/requirements-contract.txt)。`$stage09V001` 指向阶段 09 终审包中的 V001 SQL。脚本校验文件指纹；仅复跑契约时可省略 `--v001`。
 
 ```powershell
 $env:PYTHONPATH = Join-Path $env:TEMP 'newpet-stage08-openapi-validator'
+python -m pip install --target $env:PYTHONPATH -r tests/requirements-contract.txt
 python -B tests/verify_contract.py --standards --v001 $stage09V001
+git diff --check
 ```
 
+使用该目录中已安装的两项固定版本运行验证，输出如下。
+
 ```text
-144 operations, 131 paths, 203 schemas, 312 traced properties, 2226 resolvable references.
+144 operations, 131 paths, 215 schemas, 314 traced properties, 3674 resolvable references.
 Iteration: {'A1_CORE': 103, 'A2_ENABLER': 32, 'A_DEPENDENT': 9}
-Authorization matrix, route audiences, idempotency and retired field checks passed.
-15 owner endpoints and 7 conditional owner permissions verified.
-V001 SHA-256, appointment status projection and recharge refund modes verified.
+734 registered fields (45 retired), 28 traced header/query names, and recursive request model coverage verified.
+Authorization matrix, route audiences, idempotency, error responses and private cache headers passed.
+15 owner endpoints and 8 conditional owner permissions verified.
+V001 SHA-256, appointment and settlement states, refund modes and tender uniqueness verified.
 OpenAPI 3.1 standard validation passed.
-161 JSON Schema request and response examples passed.
+308 JSON Schema request and response examples passed.
 ```
 
 ## 上游与证据范围
 
-- 已核对正式需求基线 `2227fc03a698ee8f1180e04a4aa93c7c6bfe6ec1` 为本次定稿前的 `main`。
-- 已核对 V001 SHA256 为 c340be6abd87501f07f57a169bb5895162f7f4bf46505196f7188eed9392f632，与终审包输入一致。本包引用该数据库版本。
-- 定稿时核对了 24 个相对链接、49 个验收编号和全部 734 个字段的永久号、逻辑名及状态。OpenAPI 操作与 Schema 与 R2 终审包一致。
-- 校验覆盖 15 个选填原因 DTO 的省略、null、空串、全空白、合法文字和非法数字，以及 3 个必填原因、预约投影、显式充值退款模式、实际退款时间和业务错误响应形状。
-- 本轮执行的是契约和 DDL 文本校验。49 条联测用例覆盖 Spring Boot 鉴权、实际事务与并发、Redis 会话和微信真机，待服务可运行后执行。
+- 业务需求起始基线为 `2227fc03a698ee8f1180e04a4aa93c7c6bfe6ec1`。本轮用 GitHub `main` 的 `46f14684bc252d716549190d8cb30630a0e16793` 作为整改基线，本地契约版本升至 0.3.0。
+- V001 SHA-256 为 `c340be6abd87501f07f57a169bb5895162f7f4bf46505196f7188eed9392f632`。新增比对结算范围状态和付款渠道唯一键。SQL 文件沿用阶段 09 终审版。
+- 契约样例覆盖预约角色投影、两侧改期状态、20 个选填原因的六类输入、三种必填原因、券模板、原单收退款和补记、检查停止与寄养不接收、媒体用途限制、中止服务结果隐藏，以及通用 500。结构校验递归检查请求对象和数组上限，核对 734 个注册号及退役项，校验授权、参数、字段三份矩阵和私有响应头。
+- [验收矩阵](08-acceptance-matrix.md)共有 59 条，后端授权、事务、网关、实际媒体解码和旧链接失效、Redis 及微信真机待可运行环境联测。契约声明和合成请求样例的通过记录详见上方。
