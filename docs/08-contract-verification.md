@@ -2,7 +2,7 @@
 
 ## 实际执行
 
-从仓库根目录运行。依赖见 [tests/requirements-contract.txt](../tests/requirements-contract.txt)。`$stage09V001` 指向阶段 09 终审包中的 V001 SQL。脚本校验文件指纹；仅复跑契约时可省略 `--v001`。
+从仓库根目录运行。依赖见 [tests/requirements-contract.txt](../tests/requirements-contract.txt)。`$stage09V001` 指向仓库中按原指纹入库的[阶段 09 终审 V001](../backend/src/main/resources/db/migration/V001__newpet_batch_a_core.sql)。脚本校验文件指纹；仅复跑契约时可省略 `--v001`。
 
 ```powershell
 $env:PYTHONPATH = Join-Path $env:TEMP 'newpet-stage08-openapi-validator'

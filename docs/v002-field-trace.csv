@@ -1,0 +1,24 @@
+id,stage08_scope,physical_name,classification,authority_or_validation
+V002-01,A_AUTH,auth_wechat_app,operational_registration,受保护环境配置核对 AppID／受众／开放平台命名空间
+V002-02,A_AUTH,auth_wechat_group,identity_mapping,可信微信证明的发行空间＋UnionID 摘要唯一，同用户每空间仅一活动组
+V002-03,A_AUTH,auth_wechat_binding_group,identity_mapping,同用户同发行空间且必须引用原 wechat_binding
+V002-04,A_AUTH,auth_wechat_challenge.challenge_token_digest,credential_digest,原随机凭证只给调用者，MySQL 只保存摘要且单次消费
+V002-05,A_AUTH,auth_wechat_challenge.parent_challenge_id,transaction_guard,同 AppID 的单个子步骤，应用验证父挑战阶段及消费结果
+V002-06,A_AUTH,auth_wechat_challenge.sealed_context,encrypted_evidence,绑定 AppID 与时间的一次性上下文，消费后清空
+V002-07,A_AUTH,auth_wechat_challenge.expected_auth_version,transaction_guard,换绑确认重验当前 platform_user.auth_version
+V002-08,A_AUTH,auth_miniapp_session,credential_digest,AppID／受众／User／两个截止，服务端当前鉴权
+V002-09,A_AUTH,staff.staff_session_generation,revocation_generation,员工代次，停用移出恢复返聘同事务递增
+V002-10,A_AUTH,store.store_staff_session_generation,revocation_generation,整店停用及恢复同事务递增
+V002-11,A_AUTH,auth_miniapp_session.session_epoch | auth_wechat_challenge.session_epoch,restore_fence,和恢复点外的共享控制配置比对，灾备换纪元
+V002-12,A_MEDIA,private_media.private_media_id,transport_mapping,阶段 08 media_id 指向此记录的字符串标识
+V002-13,A_MEDIA,private_media.scope_kind | private_media.scope_id,access_scope,本人 User 或原店，作用域须与挂接对象一致
+V002-14,A_MEDIA,private_media.uploaded_by_user_id | private_media.uploaded_by_staff_id,actor_ref,真实上传者和所属店核对，承接原对象权限
+V002-15,A_MEDIA,private_media.media_purpose,transport_mapping,仅阶段 08 已列用途，附带时还须验证父对象类型
+V002-16,A_MEDIA,private_media.object_key | private_media.object_version | private_media.verified_sha256,storage_identity,已检查且不可变的对象版本，数据传输走授权网关
+V002-17,A_MEDIA,private_media_attachment,access_scope,同作用域同用途；F-BOARD-032 入住健康照片挂 boarding_stay，健康用途兼容照护事件，照护用途仅挂事件；当前有效挂接与父对象权限由业务重验
+V002-18,A_INVITES,invite_replay_secret.idempotency_record_id,transaction_guard,仅当次成功发码及原创建者权限，保留回执
+V002-19,A_INVITES,invite_replay_secret.staff_invitation_id | invite_replay_secret.invite_code_id,transaction_guard,同店且正好一个原码事实
+V002-20,A_INVITES,invite_replay_secret.seal_format | invite_replay_secret.kms_key_ref | invite_replay_secret.wrapped_dek | invite_replay_secret.nonce | invite_replay_secret.ciphertext,encrypted_evidence,DEK 包封与 GCM AAD 绑定原发码店、操作者、回执及截止
+V002-21,A_INVITES,invite_replay_secret.replay_until,cleanup_window,提交时取原码截止，过期只清密文
+V002-22,A_NOTIFICATION,outbox_channel_delivery,channel_receipt,事件＋收件人＋渠道唯一，外部未知结果不得盲重试
+V002-23,A_NOTIFICATION,outbox_channel_delivery.send_token,lease_fence,外部完成写与父 Outbox 未失效租约同时匹配

@@ -39,6 +39,8 @@
 - `04-staff-miniapp.md`：店员端正式需求入口。工作台聚焦当天事项，快捷入口承载四个常用动作，洗美列表归“业务 → 洗美”。服务项目管理与两种快速开单共用洗护／美容／其他三类。门店日常经营和老板设置均在小程序内，网页后台只给平台使用；不做门店侧Web经营后台。店员端必须遵守本批无审批、原因范围、自动审计、结算锁定、充值退款、待办归门店和员工完整手机号可见规则。
 - [05 平台 Web 后台](05-platform-web-admin.md)：平台专用后台及页面规格。§5.2 按门店导出，§6 店员端异常直接修复与受限代办，§7 操作权限。账号生命周期、接口及数据契约按元数据收口。
 - [08 首批 API 与鉴权契约](08-api-and-authorization.md)：双端核心闭环的 [OpenAPI](../contracts/openapi.batch-a.json)、[授权矩阵](../contracts/authorization-matrix.csv)、[字段追踪](../contracts/field-trace.csv)、[联测用例](08-acceptance-matrix.md)和[已执行验证](08-contract-verification.md)。依赖条件见 08 §9～10。
+- [11 技术架构与运行设计](11-technical-architecture-and-runtime.md)：单仓、AppID、身份、会话、媒体与事务。配套 [V001／V002 迁移](11-v002-migration-runbook.md)、[运行恢复](11-operations-and-recovery.md)、[技术准入](11-stage12-admission.md)和[已执行验证](11-runtime-verification.md)。
+- [12 V1.0 验收与冻结清单](12-v1-acceptance-and-freeze.md)：冻结范围、首条链路六步验收与证据状态。[首批单仓初始化计划](12-a1-core-monorepo-kickoff.md)为工程启动顺序。
 - `execution/deepseek-execution-standard.md`：AI执行、分批交付和独立验收约束；不新增业务规则，不替代阶段14最终开发总提示词。
 - `execution/deepseek-start-prompt.md`：上述标准的可复制启动/整改提示词。
 - [PRD 独立审计标准](standards/PRD-INDEPENDENT-AUDIT-STANDARD-V1.0.md)：范围、维度、证据、问题等级及结论。第 13 节提供可复制的只读审计模板。
